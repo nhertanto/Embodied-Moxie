@@ -1,0 +1,105 @@
+# *************************************************************************************
+# README:
+# The Book Recognizer Node's focus is to allow the child to be able
+#    to say the selected book's name or show the selected book's cover to move-on.
+#    The selected books are placed in CSV sheet the user inputs in the node
+# NOTE:
+#    This jinja file extends from the SelectContentID.jinja
+# *************************************************************************************
+
+
+{% extends "ContentID/SelectContentID.jinja" %}
+
+# Listen for the eb-br-event and eb-br-event-interrupt to see if the child showed Moxie a book cover.
+#   Moxie should respond accordingly even if the child shows the book cover while Moxie is talking.
+{% block topic_rb_flags %} [eb-br-event eb-br-event-interrupt {{topic_flags}}] {% endblock %}
+
+{# Turn on the book recognizer #}
+{% block prompt_code %}
+
+	{{super()}}
+	^eb_enable_book(true)
+    ^eb_start_show(book)
+	{{util.var_name("timedOutCount", module_id)}} = 0
+
+{% endblock %}
+
+{% block events %}
+
+# For events (anticipated phrases the child may say and for Moxie to respond to), 
+#     if we move-on, turn off book recognizer
+{% set recognizer_off %}
+
+	^eb_enable_book(false)
+    ^eb_finish_show(book)
+{% endset %}
+{{util.generate_events(events, additional_move_on_code=recognizer_off)}}
+
+{% endblock %}
+
+{% block polar_rules_before_yes_no %}
+
+	# Moxie timed out if the Mentor didn't say anything or show a book cover Moxie recognizes
+	u: TIMED_OUT (eb-wait-complete) ^keep() ^repeat()
+		# Reprompt after 1st time Moxie timed out
+		if({{util.var_name("timedOutCount", module_id)}} <= 0){
+			^reuse(REPROMPT)
+			{{util.var_name("timedOutCount", module_id)}} += 1 
+			^enableLongTimer()
+		}
+		else {
+			# turn of the book recognizer and move-on from this node
+			^eb_enable_book(false)
+            ^eb_finish_show(book)
+			{{util.exit_node(timed_out_move_on_topic)}}
+		}
+
+	{# Recognized a book by it's pattern/cover AND in the Index sheet - from Select Content ID #}
+	{{super()}}
+
+	# Recognized a book that has been scanned, but NOT in the Index CSV sheet
+	u: BOOK_NOT_IN_INDEX ([eb-br-event eb-br-event-interrupt])
+		^eb_enable_book(false)
+        ^eb_finish_show(book)
+		{{util.exit_node(Not_in_the_index_move_on)}}
+
+{% endblock %}
+
+# Turning off the book recognizer if exiting from Select Content ID
+#   This ensures the book recognizer isn't perpetually turned on while conversing to Moxie
+{% block id_selected_exit_code %}
+	^eb_enable_book(false)
+    ^eb_finish_show(book)
+{% endblock %}
+
+{% block not_bedtime_exit_code %}
+    ^eb_enable_book(false)
+    ^eb_finish_show(book)
+{% endblock %}
+
+{% block not_valid_exit_code %}
+    ^eb_enable_book(false)
+    ^eb_finish_show(book)
+{% endblock %}
+
+# Turning off the book recognizer if exiting from Polar Q
+#   This ensures the book recognizer isn't perpetually turned on while conversing to Moxie
+{% block cant_exit_code %}
+	^eb_enable_book(false)
+    ^eb_finish_show(book)
+{% endblock %}
+
+{% block idk_exit_code %}
+	^eb_enable_book(false)
+    ^eb_finish_show(book)
+{% endblock %}
+
+{% block no_exit_code %}
+	^eb_enable_book(false)
+    ^eb_finish_show(book)
+{% endblock %}
+
+{% block yes_exit_code %}
+	^eb_enable_book(false)
+    ^eb_finish_show(book)
+{% endblock %}
