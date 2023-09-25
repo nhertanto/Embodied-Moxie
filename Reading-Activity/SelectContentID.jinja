@@ -1,0 +1,92 @@
+# *************************************************************************************
+# README:
+# The Select Content ID's node focus is to allow the users to input a CSV sheet
+#    with selected content (books in this case). 
+#    This allows Moxie to listen to selected phrases, such as the book's title
+# NOTE:
+#    This jinja file extends from the PolarQuestion.jinja
+#    This file was created by a teammate! I only added a specific line of
+#    code for the Reading activity (line 26-29).
+# *************************************************************************************
+
+{% extends "PolarQuestion.jinja" %}
+
+{# import content id macros #}
+{% import "Macros/content_id_macros.jinja" as cid %}
+
+{% block polar_rules_before_yes_no %}
+# check content id patterns
+
+{# iterate through index tables #}
+{% for index_tbl in index_tables %}
+
+{% for row in index_tbl.content_indices if row[pattern_column] != "" %}
+# row.csv_dict
+u: {{row.csv_dict.content_id|upper()}} ( {{row.csv_dict[pattern_column]}} )
+    # Niken: I added the below code to allow Moxie to recognize a specific variable for the Reading Activity
+    {% if row.csv_dict.output_type|upper() %}
+    ^eb_set_output_type({{row.csv_dict.output_type|upper()}})
+    {% endif %}
+
+    $_avail_ids = ^get_available_content_ids({{module_id}} {% if content_tag %}{{content_tag}}{% else %}^""{% endif %})
+    $_this_content_id = {{row.csv_dict.content_id}}
+    $_is_valid = ^is_content_id_in_list($_avail_ids $_this_content_id)
+    
+    {# if this module supports bedtime #}
+    {% if is_bedtime %}
+    $_can_play_at_bedtime = {{row.csv_dict.bedtime}}
+    $_bedtime_valid = false
+    if ($_can_play_at_bedtime != false OR $BOMENUJSON.bedtime != true) {
+        $_bedtime_valid = true
+    }
+    {% endif %}
+
+    if ($_is_valid) {
+
+        {% if is_bedtime %}
+        if ($_bedtime_valid == true) {
+        {% endif %}
+
+            ${{module_id}}JSON.content_id = {{row.csv_dict.content_id}}
+
+            # fill content id metadata
+            {{cid.validate_id(document)}}
+            {% block id_selected_exit_code %} {# insert additional code here #}
+            {% endblock %}
+            # move on
+            {{util.exit_node(id_selected_topic)}}
+
+        {% if is_bedtime %}
+        } else {
+            {# not bedtime appropriate output #}
+            {% if marked_up_not_bedtime_appropriate_text %}
+            {{marked_up_not_bedtime_appropriate_text}}
+            {% else %}
+            {{not_bedtime_appropriate_text}}
+            {% endif %}
+            {% block not_bedtime_exit_code %} {# insert additional code here #}
+            {% endblock %}
+            {# optional routing for not bedtime appropriate choice #}
+            {{util.exit_node(not_bedtime_appropriate_move_on_output)}}
+        }
+        {% endif %}
+
+    } else {
+        {# not valid output #}
+        {% if marked_up_not_valid_text %}
+        {{marked_up_not_valid_text}}
+        {% else %}
+        {{not_valid_text}}
+        {% endif %}
+        {% block not_valid_exit_code %} {# insert additional code here #}
+        {% endblock %}
+        {# optional routing for not valid choice #}
+        {{util.exit_node(not_valid_move_on_output)}}
+    }
+
+{% endfor %}
+
+{% endfor %} {# index_tbl in index_tables #}
+
+{% endblock polar_rules_before_yes_no %}
+

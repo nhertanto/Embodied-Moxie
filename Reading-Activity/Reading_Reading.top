@@ -1,0 +1,621 @@
+# *****************************************************************************
+# README:
+# Here's the part of the generated code showcasing the Book Recognizer Node
+#   Rules such as 'u: CLICK_CLACK_MOO_COWS_THAT_TYPE' are automatically added
+#   from a csv sheet the user inputs in the node.
+#   These rules refer to the books that Moxie recognizes -- the book's title
+#   and its cover.
+# *****************************************************************************
+
+
+topic:  ~READ_Lobby_still_no_comics   keep repeat   [eb-br-event eb-br-event-interrupt ] 
+t: PROMPT() ^keep() ^repeat()
+    # prompt markup/text
+    <mark name="cmd:behaviour-tree,data:{+transition+:0.5,+duration+:1.0,+repeat+:1,+layerBlendInTime+:0.5,+layerBlendOutTime+:0.5,+blocking+:false,+action+:4,+variableName+:++,+variableValue+:++,+eventName+:+Gesture_Talk+,+lifetime+:0,+category+:+None+,+behaviour+:++,+Track+:++}"/><usel variant="1" genre="motivational">Then let's start with a book you like!<mark name="cmd:behaviour-tree,data:{+transition+:0.5,+duration+:1.0,+repeat+:1,+layerBlendInTime+:0.5,+layerBlendOutTime+:0.5,+blocking+:false,+action+:4,+variableName+:++,+variableValue+:++,+eventName+:+Gesture_None+,+lifetime+:0,+category+:+None+,+behaviour+:++,+Track+:++}"/></usel>
+    # prompt markup 2
+    ^MACRO_Reading_lobbyPrompt()
+	^eb_enable_book(true)
+    ^eb_start_show(book)
+	$T_READJSON.timedOutCount = 0
+	^enableTimerReprompt()
+u: CLARIFICATION(^gbl_clarification())
+	^GeneralOutput(OQ_YES_OR_NO)
+u: REPROMPT(^gbl_reprompt())
+    # reprompt text
+    ^MACRO_Reading_lobbyPrompt()
+## start of matching for events
+u: CANT_READ (([(can *~1 ~not *~4 read)(~not *~3 how *~2 read)]))
+    <mark name="cmd:behaviour-tree,data:{+transition+:0.5,+duration+:1.0,+repeat+:1,+layerBlendInTime+:0.5,+layerBlendOutTime+:0.5,+blocking+:false,+action+:4,+variableName+:++,+variableValue+:++,+eventName+:+Gesture_Talk+,+lifetime+:0,+category+:+None+,+behaviour+:++,+Track+:++}"/><usel variant="1" genre="none">You can tell me about the pictures,</usel><mark name="cmd:behaviour-tree,data:{+transition+:0.5,+duration+:1.0,+repeat+:1,+layerBlendInTime+:0.5,+layerBlendOutTime+:0.5,+blocking+:false,+action+:4,+variableName+:++,+variableValue+:++,+eventName+:+Gesture_Talk+,+lifetime+:0,+category+:+None+,+behaviour+:++,+Track+:++}"/><usel variant="4" genre="none"> or have your Assistant read it with you! <mark name="cmd:behaviour-tree,data:{+transition+:0.5,+duration+:1.0,+repeat+:1,+layerBlendInTime+:0.5,+layerBlendOutTime+:0.5,+blocking+:false,+action+:4,+variableName+:++,+variableValue+:++,+eventName+:+Gesture_None+,+lifetime+:0,+category+:+None+,+behaviour+:++,+Track+:++}"/></usel>
+	^eb_enable_book(false)
+    ^eb_finish_show(book)
+    # Exit Node
+    ^gambit(~READ_Lobby_can_t_read_prompt) # Gambit Specific Path
+u: OPEN_READING (([ ([got have see here this] *~5 [book it_is it one something story favorite read]) ]))
+    .
+	^eb_enable_book(false)
+    ^eb_finish_show(book)
+    # Exit Node
+    ^gambit(~READ_Lobby_book_not_in_index) # Gambit Specific Path
+## end of matching for events
+	# Moxie timed our if the Mentor didn't say anything or show a book cover Moxie recognizes
+	u: TIMED_OUT (eb-wait-complete) ^keep() ^repeat()
+		# Reprompt after 1st time Moxie timed out
+		if($T_READJSON.timedOutCount <= 0){
+			^reuse(REPROMPT)
+			$T_READJSON.timedOutCount += 1 
+			^enableLongTimer()
+		}
+		else {
+			# turn of reader and set as timed out
+			^eb_enable_book(false)
+            ^eb_finish_show(book)
+    # Exit Node
+    ^gambit(~READ_Lobby_book_choices_prompt) # Gambit Specific Path
+		}
+# check content id patterns
+# row.csv_dict
+u: CLICK_CLACK_MOO_COWS_THAT_TYPE ( ([(click *~1 clack *~1 moo) (<< click clack moo >>) (^eb_get_br_value()=cover-click_clack_moo_cows_that_type [eb-br-event eb-br-event-interrupt])]) )
+    $_avail_ids = ^get_available_content_ids(READ ^"")
+    $_this_content_id = click_clack_moo_cows_that_type
+    $_is_valid = ^is_content_id_in_list($_avail_ids $_this_content_id)
+    if ($_is_valid) {
+            $READJSON.content_id = click_clack_moo_cows_that_type
+            # fill content id metadata
+    if( !$READJSON.content_id )
+    {
+    ^GeneralOutput(NULL_ID_01) # "gulp, i seem to have encountered an error in my programming"
+    ^GeneralOutput(NULL_ID_02) # "Let's try this again some other time"
+    ^log_write(BOTH ERROR ^"[CID] Failed to set Content ID in Module READ")
+    ^exit_controller()
+    ^end(TOPIC)
+    }
+	^eb_enable_book(false)
+    ^eb_finish_show(book)
+            # move on
+    # Exit Node
+    ^gambit(~READ_Lobby_id_selected) # Gambit Specific Path
+    } else {
+        ^GeneralOutput(NULL_ID_01) ^GeneralOutput(NULL_ID_02)
+    ^eb_enable_book(false)
+    ^eb_finish_show(book)
+    # Exit Node
+    ^gambit(~READ_Lobby_buffer_to_exit_3) # Gambit Specific Path
+    }
+# row.csv_dict
+u: WHERE_THE_WILD_THINGS_ARE ( ([(wild * thing) (^eb_get_br_value()=cover-where_the_wild_things_are [eb-br-event eb-br-event-interrupt])]) )
+    $_avail_ids = ^get_available_content_ids(READ ^"")
+    $_this_content_id = where_the_wild_things_are
+    $_is_valid = ^is_content_id_in_list($_avail_ids $_this_content_id)
+    if ($_is_valid) {
+            $READJSON.content_id = where_the_wild_things_are
+            # fill content id metadata
+    if( !$READJSON.content_id )
+    {
+    ^GeneralOutput(NULL_ID_01) # "gulp, i seem to have encountered an error in my programming"
+    ^GeneralOutput(NULL_ID_02) # "Let's try this again some other time"
+    ^log_write(BOTH ERROR ^"[CID] Failed to set Content ID in Module READ")
+    ^exit_controller()
+    ^end(TOPIC)
+    }
+	^eb_enable_book(false)
+    ^eb_finish_show(book)
+            # move on
+    # Exit Node
+    ^gambit(~READ_Lobby_id_selected) # Gambit Specific Path
+    } else {
+        ^GeneralOutput(NULL_ID_01) ^GeneralOutput(NULL_ID_02)
+    ^eb_enable_book(false)
+    ^eb_finish_show(book)
+    # Exit Node
+    ^gambit(~READ_Lobby_buffer_to_exit_3) # Gambit Specific Path
+    }
+# row.csv_dict
+u: OH_THE_PLACES_YOULL_GO ( ([([oh all aw ah ha yall ya] *~3 place *~3 go) (^eb_get_br_value()=cover-oh_the_places_youll_go [eb-br-event eb-br-event-interrupt])]) )
+    $_avail_ids = ^get_available_content_ids(READ ^"")
+    $_this_content_id = oh_the_places_youll_go
+    $_is_valid = ^is_content_id_in_list($_avail_ids $_this_content_id)
+    if ($_is_valid) {
+            $READJSON.content_id = oh_the_places_youll_go
+            # fill content id metadata
+    if( !$READJSON.content_id )
+    {
+    ^GeneralOutput(NULL_ID_01) # "gulp, i seem to have encountered an error in my programming"
+    ^GeneralOutput(NULL_ID_02) # "Let's try this again some other time"
+    ^log_write(BOTH ERROR ^"[CID] Failed to set Content ID in Module READ")
+    ^exit_controller()
+    ^end(TOPIC)
+    }
+	^eb_enable_book(false)
+    ^eb_finish_show(book)
+            # move on
+    # Exit Node
+    ^gambit(~READ_Lobby_id_selected) # Gambit Specific Path
+    } else {
+        ^GeneralOutput(NULL_ID_01) ^GeneralOutput(NULL_ID_02)
+    ^eb_enable_book(false)
+    ^eb_finish_show(book)
+    # Exit Node
+    ^gambit(~READ_Lobby_buffer_to_exit_3) # Gambit Specific Path
+    }
+# row.csv_dict
+u: WAITING_IS_NOT_EASY ( ([(wait * ~not * easy) (^eb_get_br_value()=cover-waiting_is_not_easy [eb-br-event eb-br-event-interrupt]) ]) )
+    $_avail_ids = ^get_available_content_ids(READ ^"")
+    $_this_content_id = waiting_is_not_easy
+    $_is_valid = ^is_content_id_in_list($_avail_ids $_this_content_id)
+    if ($_is_valid) {
+            $READJSON.content_id = waiting_is_not_easy
+            # fill content id metadata
+    if( !$READJSON.content_id )
+    {
+    ^GeneralOutput(NULL_ID_01) # "gulp, i seem to have encountered an error in my programming"
+    ^GeneralOutput(NULL_ID_02) # "Let's try this again some other time"
+    ^log_write(BOTH ERROR ^"[CID] Failed to set Content ID in Module READ")
+    ^exit_controller()
+    ^end(TOPIC)
+    }
+	^eb_enable_book(false)
+    ^eb_finish_show(book)
+            # move on
+    # Exit Node
+    ^gambit(~READ_Lobby_id_selected) # Gambit Specific Path
+    } else {
+        ^GeneralOutput(NULL_ID_01) ^GeneralOutput(NULL_ID_02)
+    ^eb_enable_book(false)
+    ^eb_finish_show(book)
+    # Exit Node
+    ^gambit(~READ_Lobby_buffer_to_exit_3) # Gambit Specific Path
+    }
+# row.csv_dict
+u: A_SICK_DAY_FOR_AMOS_MC_GEE ( ([(sick *~2 day *~4 amos) (^eb_get_br_value()=cover-a_sick_day_for_amos_mc_gee [eb-br-event eb-br-event-interrupt])]) )
+    $_avail_ids = ^get_available_content_ids(READ ^"")
+    $_this_content_id = a_sick_day_for_amos_mc_gee
+    $_is_valid = ^is_content_id_in_list($_avail_ids $_this_content_id)
+    if ($_is_valid) {
+            $READJSON.content_id = a_sick_day_for_amos_mc_gee
+            # fill content id metadata
+    if( !$READJSON.content_id )
+    {
+    ^GeneralOutput(NULL_ID_01) # "gulp, i seem to have encountered an error in my programming"
+    ^GeneralOutput(NULL_ID_02) # "Let's try this again some other time"
+    ^log_write(BOTH ERROR ^"[CID] Failed to set Content ID in Module READ")
+    ^exit_controller()
+    ^end(TOPIC)
+    }
+	^eb_enable_book(false)
+    ^eb_finish_show(book)
+            # move on
+    # Exit Node
+    ^gambit(~READ_Lobby_id_selected) # Gambit Specific Path
+    } else {
+        ^GeneralOutput(NULL_ID_01) ^GeneralOutput(NULL_ID_02)
+    ^eb_enable_book(false)
+    ^eb_finish_show(book)
+    # Exit Node
+    ^gambit(~READ_Lobby_buffer_to_exit_3) # Gambit Specific Path
+    }
+# row.csv_dict
+u: WE_DONT_EAT_OUR_CLASSMATES ( ([ (~not *~3 eat *~4 [class classmate class_mate classmates]) (^eb_get_br_value()=cover-we_dont_eat_our_classmates [eb-br-event eb-br-event-interrupt]) ]) )
+    $_avail_ids = ^get_available_content_ids(READ ^"")
+    $_this_content_id = we_dont_eat_our_classmates
+    $_is_valid = ^is_content_id_in_list($_avail_ids $_this_content_id)
+    if ($_is_valid) {
+            $READJSON.content_id = we_dont_eat_our_classmates
+            # fill content id metadata
+    if( !$READJSON.content_id )
+    {
+    ^GeneralOutput(NULL_ID_01) # "gulp, i seem to have encountered an error in my programming"
+    ^GeneralOutput(NULL_ID_02) # "Let's try this again some other time"
+    ^log_write(BOTH ERROR ^"[CID] Failed to set Content ID in Module READ")
+    ^exit_controller()
+    ^end(TOPIC)
+    }
+	^eb_enable_book(false)
+    ^eb_finish_show(book)
+            # move on
+    # Exit Node
+    ^gambit(~READ_Lobby_id_selected) # Gambit Specific Path
+    } else {
+        ^GeneralOutput(NULL_ID_01) ^GeneralOutput(NULL_ID_02)
+    ^eb_enable_book(false)
+    ^eb_finish_show(book)
+    # Exit Node
+    ^gambit(~READ_Lobby_buffer_to_exit_3) # Gambit Specific Path
+    }
+# row.csv_dict
+u: SYLVESTER_AND_THE_MAGIC_PEBBLE ( ([ (sylvester *~4 magic *~2 pebble) (^eb_get_br_value()=cover-sylvester_and_the_magic_pebble [eb-br-event eb-br-event-interrupt]) ]) )
+    $_avail_ids = ^get_available_content_ids(READ ^"")
+    $_this_content_id = sylvester_and_the_magic_pebble
+    $_is_valid = ^is_content_id_in_list($_avail_ids $_this_content_id)
+    if ($_is_valid) {
+            $READJSON.content_id = sylvester_and_the_magic_pebble
+            # fill content id metadata
+    if( !$READJSON.content_id )
+    {
+    ^GeneralOutput(NULL_ID_01) # "gulp, i seem to have encountered an error in my programming"
+    ^GeneralOutput(NULL_ID_02) # "Let's try this again some other time"
+    ^log_write(BOTH ERROR ^"[CID] Failed to set Content ID in Module READ")
+    ^exit_controller()
+    ^end(TOPIC)
+    }
+	^eb_enable_book(false)
+    ^eb_finish_show(book)
+            # move on
+    # Exit Node
+    ^gambit(~READ_Lobby_id_selected) # Gambit Specific Path
+    } else {
+        ^GeneralOutput(NULL_ID_01) ^GeneralOutput(NULL_ID_02)
+    ^eb_enable_book(false)
+    ^eb_finish_show(book)
+    # Exit Node
+    ^gambit(~READ_Lobby_buffer_to_exit_3) # Gambit Specific Path
+    }
+# row.csv_dict
+u: OLIVIA ( ([ (olivia *~2 >) (^eb_get_br_value()=cover-olivia [eb-br-event eb-br-event-interrupt])]) )
+    $_avail_ids = ^get_available_content_ids(READ ^"")
+    $_this_content_id = olivia
+    $_is_valid = ^is_content_id_in_list($_avail_ids $_this_content_id)
+    if ($_is_valid) {
+            $READJSON.content_id = olivia
+            # fill content id metadata
+    if( !$READJSON.content_id )
+    {
+    ^GeneralOutput(NULL_ID_01) # "gulp, i seem to have encountered an error in my programming"
+    ^GeneralOutput(NULL_ID_02) # "Let's try this again some other time"
+    ^log_write(BOTH ERROR ^"[CID] Failed to set Content ID in Module READ")
+    ^exit_controller()
+    ^end(TOPIC)
+    }
+	^eb_enable_book(false)
+    ^eb_finish_show(book)
+            # move on
+    # Exit Node
+    ^gambit(~READ_Lobby_id_selected) # Gambit Specific Path
+    } else {
+        ^GeneralOutput(NULL_ID_01) ^GeneralOutput(NULL_ID_02)
+    ^eb_enable_book(false)
+    ^eb_finish_show(book)
+    # Exit Node
+    ^gambit(~READ_Lobby_buffer_to_exit_3) # Gambit Specific Path
+    }
+# row.csv_dict
+u: COMIC_BOOK_2 ( ([ (life *~2 ~botname) (second *~4 [comic part volume]) ([part volume comic] *~4 [two too to 2]) (^eb_get_br_value()=cover-comic_book_2  [eb-br-event eb-br-event-interrupt])]) )
+    $_avail_ids = ^get_available_content_ids(READ ^"")
+    $_this_content_id = comic_book_2
+    $_is_valid = ^is_content_id_in_list($_avail_ids $_this_content_id)
+    if ($_is_valid) {
+            $READJSON.content_id = comic_book_2
+            # fill content id metadata
+    if( !$READJSON.content_id )
+    {
+    ^GeneralOutput(NULL_ID_01) # "gulp, i seem to have encountered an error in my programming"
+    ^GeneralOutput(NULL_ID_02) # "Let's try this again some other time"
+    ^log_write(BOTH ERROR ^"[CID] Failed to set Content ID in Module READ")
+    ^exit_controller()
+    ^end(TOPIC)
+    }
+	^eb_enable_book(false)
+    ^eb_finish_show(book)
+            # move on
+    # Exit Node
+    ^gambit(~READ_Lobby_id_selected) # Gambit Specific Path
+    } else {
+        ^GeneralOutput(NULL_ID_01) ^GeneralOutput(NULL_ID_02)
+    ^eb_enable_book(false)
+    ^eb_finish_show(book)
+    # Exit Node
+    ^gambit(~READ_Lobby_buffer_to_exit_3) # Gambit Specific Path
+    }
+# row.csv_dict
+u: COMIC_BOOK_1 ( ([ (history  *~4 [ ~botname ~GRL Global Robotic Laboratory]) ( first *~4 [part volume comic]) ([volume part comic] *~4 [one 1]) (^eb_get_br_value()=cover-comic_book_1  [eb-br-event eb-br-event-interrupt]) ]) )
+    $_avail_ids = ^get_available_content_ids(READ ^"")
+    $_this_content_id = comic_book_1
+    $_is_valid = ^is_content_id_in_list($_avail_ids $_this_content_id)
+    if ($_is_valid) {
+            $READJSON.content_id = comic_book_1
+            # fill content id metadata
+    if( !$READJSON.content_id )
+    {
+    ^GeneralOutput(NULL_ID_01) # "gulp, i seem to have encountered an error in my programming"
+    ^GeneralOutput(NULL_ID_02) # "Let's try this again some other time"
+    ^log_write(BOTH ERROR ^"[CID] Failed to set Content ID in Module READ")
+    ^exit_controller()
+    ^end(TOPIC)
+    }
+	^eb_enable_book(false)
+    ^eb_finish_show(book)
+            # move on
+    # Exit Node
+    ^gambit(~READ_Lobby_id_selected) # Gambit Specific Path
+    } else {
+        ^GeneralOutput(NULL_ID_01) ^GeneralOutput(NULL_ID_02)
+    ^eb_enable_book(false)
+    ^eb_finish_show(book)
+    # Exit Node
+    ^gambit(~READ_Lobby_buffer_to_exit_3) # Gambit Specific Path
+    }
+# row.csv_dict
+u: THE_DAY_YOU_BEGIN ( ([([today day] you [begin start]) (^eb_get_br_value()=cover-the_day_you_begin [eb-br-event eb-br-event-interrupt])]) )
+    $_avail_ids = ^get_available_content_ids(READ ^"")
+    $_this_content_id = the_day_you_begin
+    $_is_valid = ^is_content_id_in_list($_avail_ids $_this_content_id)
+    if ($_is_valid) {
+            $READJSON.content_id = the_day_you_begin
+            # fill content id metadata
+    if( !$READJSON.content_id )
+    {
+    ^GeneralOutput(NULL_ID_01) # "gulp, i seem to have encountered an error in my programming"
+    ^GeneralOutput(NULL_ID_02) # "Let's try this again some other time"
+    ^log_write(BOTH ERROR ^"[CID] Failed to set Content ID in Module READ")
+    ^exit_controller()
+    ^end(TOPIC)
+    }
+	^eb_enable_book(false)
+    ^eb_finish_show(book)
+            # move on
+    # Exit Node
+    ^gambit(~READ_Lobby_id_selected) # Gambit Specific Path
+    } else {
+        ^GeneralOutput(NULL_ID_01) ^GeneralOutput(NULL_ID_02)
+    ^eb_enable_book(false)
+    ^eb_finish_show(book)
+    # Exit Node
+    ^gambit(~READ_Lobby_buffer_to_exit_3) # Gambit Specific Path
+    }
+# row.csv_dict
+u: BECAUSE_A_LITTLE_BUG_WENT_KA_CHOO ( ([ ([because cause] *~1 [little small tiny] bug [go say]) (^eb_get_br_value()=cover-because_a_little_bug_went_ka_choo [eb-br-event eb-br-event-interrupt]) ]) )
+    $_avail_ids = ^get_available_content_ids(READ ^"")
+    $_this_content_id = because_a_little_bug_went_ka_choo
+    $_is_valid = ^is_content_id_in_list($_avail_ids $_this_content_id)
+    if ($_is_valid) {
+            $READJSON.content_id = because_a_little_bug_went_ka_choo
+            # fill content id metadata
+    if( !$READJSON.content_id )
+    {
+    ^GeneralOutput(NULL_ID_01) # "gulp, i seem to have encountered an error in my programming"
+    ^GeneralOutput(NULL_ID_02) # "Let's try this again some other time"
+    ^log_write(BOTH ERROR ^"[CID] Failed to set Content ID in Module READ")
+    ^exit_controller()
+    ^end(TOPIC)
+    }
+	^eb_enable_book(false)
+    ^eb_finish_show(book)
+            # move on
+    # Exit Node
+    ^gambit(~READ_Lobby_id_selected) # Gambit Specific Path
+    } else {
+        ^GeneralOutput(NULL_ID_01) ^GeneralOutput(NULL_ID_02)
+    ^eb_enable_book(false)
+    ^eb_finish_show(book)
+    # Exit Node
+    ^gambit(~READ_Lobby_buffer_to_exit_3) # Gambit Specific Path
+    }
+# row.csv_dict
+u: THE_BEST_CHOCOLATE_CHIP_COOKIE_RECIPE_IN_THE_WORLD ( ([ (best {chocolate} {chip} cookie recipe * world) ]) )
+    $_avail_ids = ^get_available_content_ids(READ ^"")
+    $_this_content_id = the_best_chocolate_chip_cookie_recipe_in_the_world
+    $_is_valid = ^is_content_id_in_list($_avail_ids $_this_content_id)
+    if ($_is_valid) {
+            $READJSON.content_id = the_best_chocolate_chip_cookie_recipe_in_the_world
+            # fill content id metadata
+    if( !$READJSON.content_id )
+    {
+    ^GeneralOutput(NULL_ID_01) # "gulp, i seem to have encountered an error in my programming"
+    ^GeneralOutput(NULL_ID_02) # "Let's try this again some other time"
+    ^log_write(BOTH ERROR ^"[CID] Failed to set Content ID in Module READ")
+    ^exit_controller()
+    ^end(TOPIC)
+    }
+	^eb_enable_book(false)
+    ^eb_finish_show(book)
+            # move on
+    # Exit Node
+    ^gambit(~READ_Lobby_id_selected) # Gambit Specific Path
+    } else {
+        ^GeneralOutput(NULL_ID_01) ^GeneralOutput(NULL_ID_02)
+    ^eb_enable_book(false)
+    ^eb_finish_show(book)
+    # Exit Node
+    ^gambit(~READ_Lobby_buffer_to_exit_3) # Gambit Specific Path
+    }
+# row.csv_dict
+u: HOW_DO_ANIMALS_MEASURE_UP ( ([([animal animals] measure *~2 > )]) )
+    $_avail_ids = ^get_available_content_ids(READ ^"")
+    $_this_content_id = how_do_animals_measure_up
+    $_is_valid = ^is_content_id_in_list($_avail_ids $_this_content_id)
+    if ($_is_valid) {
+            $READJSON.content_id = how_do_animals_measure_up
+            # fill content id metadata
+    if( !$READJSON.content_id )
+    {
+    ^GeneralOutput(NULL_ID_01) # "gulp, i seem to have encountered an error in my programming"
+    ^GeneralOutput(NULL_ID_02) # "Let's try this again some other time"
+    ^log_write(BOTH ERROR ^"[CID] Failed to set Content ID in Module READ")
+    ^exit_controller()
+    ^end(TOPIC)
+    }
+	^eb_enable_book(false)
+    ^eb_finish_show(book)
+            # move on
+    # Exit Node
+    ^gambit(~READ_Lobby_id_selected) # Gambit Specific Path
+    } else {
+        ^GeneralOutput(NULL_ID_01) ^GeneralOutput(NULL_ID_02)
+    ^eb_enable_book(false)
+    ^eb_finish_show(book)
+    # Exit Node
+    ^gambit(~READ_Lobby_buffer_to_exit_3) # Gambit Specific Path
+    }
+# row.csv_dict
+u: HOP_ON_POP ( ([ (hop *~1 pop) (^eb_get_br_value()=cover-hop_on_pop [eb-br-event eb-br-event-interrupt]) (^eb_get_br_value()=back-hop_on_pop [eb-br-event eb-br-event-interrupt])]) )
+    $_avail_ids = ^get_available_content_ids(READ ^"")
+    $_this_content_id = hop_on_pop
+    $_is_valid = ^is_content_id_in_list($_avail_ids $_this_content_id)
+    if ($_is_valid) {
+            $READJSON.content_id = hop_on_pop
+            # fill content id metadata
+    if( !$READJSON.content_id )
+    {
+    ^GeneralOutput(NULL_ID_01) # "gulp, i seem to have encountered an error in my programming"
+    ^GeneralOutput(NULL_ID_02) # "Let's try this again some other time"
+    ^log_write(BOTH ERROR ^"[CID] Failed to set Content ID in Module READ")
+    ^exit_controller()
+    ^end(TOPIC)
+    }
+	^eb_enable_book(false)
+    ^eb_finish_show(book)
+            # move on
+    # Exit Node
+    ^gambit(~READ_Lobby_id_selected) # Gambit Specific Path
+    } else {
+        ^GeneralOutput(NULL_ID_01) ^GeneralOutput(NULL_ID_02)
+    ^eb_enable_book(false)
+    ^eb_finish_show(book)
+    # Exit Node
+    ^gambit(~READ_Lobby_buffer_to_exit_3) # Gambit Specific Path
+    }
+# row.csv_dict
+u: THE_GREAT_EGGSCAPE ( ([ (great *~2 [eggscape escape eggs egg]) (^eb_get_br_value()=cover-the_great_eggscape [eb-br-event eb-br-event-interrupt]) ]) )
+    $_avail_ids = ^get_available_content_ids(READ ^"")
+    $_this_content_id = the_great_eggscape
+    $_is_valid = ^is_content_id_in_list($_avail_ids $_this_content_id)
+    if ($_is_valid) {
+            $READJSON.content_id = the_great_eggscape
+            # fill content id metadata
+    if( !$READJSON.content_id )
+    {
+    ^GeneralOutput(NULL_ID_01) # "gulp, i seem to have encountered an error in my programming"
+    ^GeneralOutput(NULL_ID_02) # "Let's try this again some other time"
+    ^log_write(BOTH ERROR ^"[CID] Failed to set Content ID in Module READ")
+    ^exit_controller()
+    ^end(TOPIC)
+    }
+	^eb_enable_book(false)
+    ^eb_finish_show(book)
+            # move on
+    # Exit Node
+    ^gambit(~READ_Lobby_id_selected) # Gambit Specific Path
+    } else {
+        ^GeneralOutput(NULL_ID_01) ^GeneralOutput(NULL_ID_02)
+    ^eb_enable_book(false)
+    ^eb_finish_show(book)
+    # Exit Node
+    ^gambit(~READ_Lobby_buffer_to_exit_3) # Gambit Specific Path
+    }
+# row.csv_dict
+u: A_MOTHER_FOR_CHOCO ( ([(mother *~2 [choco chaco coco]) (^eb_get_br_value()=cover-a_mother_for_choco [eb-br-event eb-br-event-interrupt]) (^eb_get_br_value()=back-a_mother_for_choco [eb-br-event eb-br-event-interrupt]) ]) )
+    $_avail_ids = ^get_available_content_ids(READ ^"")
+    $_this_content_id = a_mother_for_choco
+    $_is_valid = ^is_content_id_in_list($_avail_ids $_this_content_id)
+    if ($_is_valid) {
+            $READJSON.content_id = a_mother_for_choco
+            # fill content id metadata
+    if( !$READJSON.content_id )
+    {
+    ^GeneralOutput(NULL_ID_01) # "gulp, i seem to have encountered an error in my programming"
+    ^GeneralOutput(NULL_ID_02) # "Let's try this again some other time"
+    ^log_write(BOTH ERROR ^"[CID] Failed to set Content ID in Module READ")
+    ^exit_controller()
+    ^end(TOPIC)
+    }
+	^eb_enable_book(false)
+    ^eb_finish_show(book)
+            # move on
+    # Exit Node
+    ^gambit(~READ_Lobby_id_selected) # Gambit Specific Path
+    } else {
+        ^GeneralOutput(NULL_ID_01) ^GeneralOutput(NULL_ID_02)
+    ^eb_enable_book(false)
+    ^eb_finish_show(book)
+    # Exit Node
+    ^gambit(~READ_Lobby_buffer_to_exit_3) # Gambit Specific Path
+    }
+# row.csv_dict
+u: APPLE_PIE_4TH_OF_JULY ( ([ ([apple pie] *~5 july) (^eb_get_br_value()=cover-apple_pie_4th_of_july [eb-br-event eb-br-event-interrupt]) ]) )
+    $_avail_ids = ^get_available_content_ids(READ ^"")
+    $_this_content_id = apple_pie_4th_of_july
+    $_is_valid = ^is_content_id_in_list($_avail_ids $_this_content_id)
+    if ($_is_valid) {
+            $READJSON.content_id = apple_pie_4th_of_july
+            # fill content id metadata
+    if( !$READJSON.content_id )
+    {
+    ^GeneralOutput(NULL_ID_01) # "gulp, i seem to have encountered an error in my programming"
+    ^GeneralOutput(NULL_ID_02) # "Let's try this again some other time"
+    ^log_write(BOTH ERROR ^"[CID] Failed to set Content ID in Module READ")
+    ^exit_controller()
+    ^end(TOPIC)
+    }
+	^eb_enable_book(false)
+    ^eb_finish_show(book)
+            # move on
+    # Exit Node
+    ^gambit(~READ_Lobby_id_selected) # Gambit Specific Path
+    } else {
+        ^GeneralOutput(NULL_ID_01) ^GeneralOutput(NULL_ID_02)
+    ^eb_enable_book(false)
+    ^eb_finish_show(book)
+    # Exit Node
+    ^gambit(~READ_Lobby_buffer_to_exit_3) # Gambit Specific Path
+    }
+# row.csv_dict
+u: A_BOOK ( (^gbl_fallback()) )
+    ^eb_set_output_type(BASE_CASE)
+    $_avail_ids = ^get_available_content_ids(READ ^"")
+    $_this_content_id = a_book
+    $_is_valid = ^is_content_id_in_list($_avail_ids $_this_content_id)
+    if ($_is_valid) {
+            $READJSON.content_id = a_book
+            # fill content id metadata
+    if( !$READJSON.content_id )
+    {
+    ^GeneralOutput(NULL_ID_01) # "gulp, i seem to have encountered an error in my programming"
+    ^GeneralOutput(NULL_ID_02) # "Let's try this again some other time"
+    ^log_write(BOTH ERROR ^"[CID] Failed to set Content ID in Module READ")
+    ^exit_controller()
+    ^end(TOPIC)
+    }
+	^eb_enable_book(false)
+    ^eb_finish_show(book)
+            # move on
+    # Exit Node
+    ^gambit(~READ_Lobby_id_selected) # Gambit Specific Path
+    } else {
+        ^GeneralOutput(NULL_ID_01) ^GeneralOutput(NULL_ID_02)
+    ^eb_enable_book(false)
+    ^eb_finish_show(book)
+    # Exit Node
+    ^gambit(~READ_Lobby_buffer_to_exit_3) # Gambit Specific Path
+    }
+	# Recognized a book that has been scanned, but NOT in the Index sheet
+	u: BOOK_NOT_IN_INDEX ([eb-br-event eb-br-event-interrupt])
+		^eb_enable_book(false)
+        ^eb_finish_show(book)
+    # Exit Node
+    ^gambit(~READ_Lobby_book_not_in_index) # Gambit Specific Path
+u: CANT_DO_THAT([ ^globalPattern_childCanNot()  ])
+	<mark name="cmd:behaviour-tree,data:{+transition+:0.5,+duration+:1.0,+repeat+:1,+layerBlendInTime+:0.5,+layerBlendOutTime+:0.5,+blocking+:false,+action+:4,+variableName+:++,+variableValue+:++,+eventName+:+Gesture_Talk+,+lifetime+:0,+category+:+None+,+behaviour+:++,+Track+:++}"/><usel variant="1" genre="none">You can tell me about the pictures,</usel><mark name="cmd:behaviour-tree,data:{+transition+:0.5,+duration+:1.0,+repeat+:1,+layerBlendInTime+:0.5,+layerBlendOutTime+:0.5,+blocking+:false,+action+:4,+variableName+:++,+variableValue+:++,+eventName+:+Gesture_Talk+,+lifetime+:0,+category+:+None+,+behaviour+:++,+Track+:++}"/><usel variant="4" genre="none"> or have your Assistant read it with you! <mark name="cmd:behaviour-tree,data:{+transition+:0.5,+duration+:1.0,+repeat+:1,+layerBlendInTime+:0.5,+layerBlendOutTime+:0.5,+blocking+:false,+action+:4,+variableName+:++,+variableValue+:++,+eventName+:+Gesture_None+,+lifetime+:0,+category+:+None+,+behaviour+:++,+Track+:++}"/></usel>
+	^eb_enable_book(false)
+    ^eb_finish_show(book)
+    # Exit Node
+    ^gambit(~READ_Lobby_can_t_read_prompt) # Gambit Specific Path
+u: IDK_POLAR ([^gbl_moveOn() ^globalPattern_idkBot() ])
+    ^GeneralOutput(placate)
+	^eb_enable_book(false)
+    ^eb_finish_show(book)
+    # Exit Node
+    ^gambit(~READ_Lobby_no_idk_find_book) # Gambit Specific Path
+u: NO_POLAR ([(^globalPattern_noBot())  ((!([ (~not *~3 eat *~4 [class classmate class_mate]) (^eb_get_br_value()=cover-we_dont_eat_our_classmates [eb-br-event eb-br-event-interrupt]) ])) [~not ~dislike])])
+	^eb_enable_book(false)
+    ^eb_finish_show(book)
+    # Exit Node
+    ^gambit(~READ_Lobby_no_idk_find_book) # Gambit Specific Path
+u: YES_POLAR ([(^globalPattern_yesBot())  ])
+	^eb_enable_book(false)
+    ^eb_finish_show(book)
+    # Exit Node
+    ^gambit(~READ_Lobby_book_not_in_index) # Gambit Specific Path
+	^GeneralOutput(OQ_YES_OR_NO)
+u: TRIGGER_REPROMPT (eb-wait-complete)
+	^reuse(REPROMPT)
+## polar question end ##
+## polar question node start ##
