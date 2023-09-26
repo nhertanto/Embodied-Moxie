@@ -1,0 +1,45 @@
+# *************************************************************************************
+# README:
+# As a game designer, I help create 'patterns,' specific phrases that Moxie would
+#    listen to enter into the Joke activity!
+# *************************************************************************************
+
+# The Patterns that would have Moxie ask the child to tell them a joke.
+
+# can i tell you a joke
+# I have a joke for you
+# do you want to hear a joke
+# do you want me to tell you a joke
+# I want to tell a joke
+# let me tell you a joke
+# I would like to tell a joke 
+patternmacro: ^P_JOKES_userTellJoke()
+[
+    (!~negation [can could may] I  *~2 tell {you} a *~2 joke)
+    (!~negation I [have (have got) know] *~2 joke)
+    ([do will] you {[~intensifier definitely]} [like care want ~want] !~negation *~2 [hear listen get know] {a} *~2 joke) 
+    (< {~botname} you {[~intensifier definitely]} [like care want ~want] !~negation *~2 [hear listen get know] {a} *~2 joke) 
+    ([do will] you {[~intensifier definitely]} [like care want ~want] [I we us] !~negation *~2 [tell say give do] {you} *~2 [joke (something [funny ~silly])]  )
+    ([^intentPattern_request() (let [I we us])] !~negation *~2 [say do tell] {you} {a} *~2 [joke (something [funny ~silly]) ])
+]
+
+# The Patterns that would have Moxie tell the child a joke.
+
+# can you tell me a joke
+# I want a joke
+# tell me something funny
+# do you have any new jokes
+# what kind of jokes do you have
+# I'd like you to tell us something silly
+patternmacro: ^JOKE_module_entry_DEFAULT()
+[
+(![~negation ~not] [
+	([say give tell do let]{[me us I we]} *~4 {you} *~2 [joke (something *~1 ~silly)] %tense=present)
+	(< {~botname}{please}{[will let_us]} *~1 [do tell] !you *~4 [joke (something *~1 ~silly)] {please}{~botname} > %tense=present) 
+	(do *~3 [joke (something *~1 ~silly)] *~1 [for with] [I we us] %tense=present) (be there *~4 [joke (something *~1 ~silly)] %tense=present) 
+	([do have] [you ~botname] {[~intensifier definitely]} [have got know] *~5 [joke (something *~1 ~silly)]) 
+	(< {~botname}{please} *~3 [joke (something *~1 ~silly)] *~1 {please}{~botname} >) 
+	(what {[kind type]} *~5 [joke (something *~1 ~silly)] *~3 [you ~botname] [have know got]) 
+	([([will D] *~1 {[~intensifier definitely]} [like love]) want] *~2 {[do say hear (tell[I we us])]} *~3 {you} *~2 [joke (something *~1 ~silly)])
+	])
+]
