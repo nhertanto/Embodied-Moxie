@@ -1,0 +1,104 @@
+# *************************************************************************************
+# README:
+# The Active Listening's node focus is to allow Moxie to listen
+# NOTE:
+#    This file  was created by a teammate!
+#    I added the block 'partial_rules' so that in the Reading node we can add  
+#    the ability to read speech-to-text (STT) partials
+# *************************************************************************************
+
+{% macro exit_code(alt_exit) %}
+    {# deconstruct active listening #}
+    {{util.var_name("ActiveListenJSON", module_id)}} = null
+    {# exit #}
+    {{util.exit_node(alt_exit)}}
+{% endmacro %}
+
+{% extends "BaseTemplates/base_topic.jinja" %}
+
+{% block prompt_content %}
+    # Init Active Listening
+    {{util.var_name("ActiveListenJSON", module_id)}} = ^jsoncreate(permanent object)
+    # prevents the same rule from firing twice per input
+    {{util.var_name("ActiveListenJSON.partial_tracker", module_id)}} = ^jsoncreate(permanent object)
+    # sfx and comment cool down timer
+    {{util.var_name("ActiveListenJSON.cool_down", module_id)}} = {% if cool_down and cool_down|int(-1) != -1 %} {{cool_down}} {% else %} 3 {% endif %}
+    # init last output match time
+    {{util.var_name("ActiveListenJSON.last_output", module_id)}} = 0
+    
+    {# do the rest of the prompt content #}
+    {{super()}}
+{% endblock prompt_content %}
+
+{% block body %}
+
+{# Rule that will end the activity as if the user completed it #}
+{% block end_rule %}
+u: END_ACTIVE_LISTENING( {% block end_pattern %} {{end_pattern}} {% endblock end_pattern %} )
+    {% block end_content %}
+    {{exit_code(end_move_on_topic)}}
+    {% endblock end_content %}
+{% endblock end_rule %}
+
+{# Rule that will exit the activity as if the user wants to end early #}
+{% block exit_rule %}
+{% if exit_pattern and exit_move_on_topic %}
+u: EXIT_ACTIVE_LISTENING( {% block exit_pattern %} {{exit_pattern}} {% endblock exit_pattern %} )
+    {% block exit_content %}
+    {{exit_code(exit_move_on_topic)}}
+    {% endblock exit_content %}
+{% endif %}
+{% endblock exit_rule %}
+
+{# this rule may not produce output, so empty pattern here is safe #}
+u: MATCH_INPUT({% block match_input_pattern %}{% endblock match_input_pattern %})
+
+    {# store current response #}
+    $_response = %response
+    {# look for a match (checks all rejoinders, then executes code below it) #}
+    ^sequence()
+    {# if match, update last response #}
+    if($_response < %response)
+    {
+        {# update last output time #}
+        {{util.var_name("ActiveListenJSON.last_output", module_id)}} = ^getFullTime()
+    }
+
+    {% block partial_rules %} {# responses that fire off of either STT Partials or STT Finals #}
+    {% endblock partial_rules %}
+
+    {% block final_rules %}
+    # if we are off cool down, and response a final, look for match
+    a: STT_FINALS(!$eb_state_speechfinal=false ^compareTime({{util.var_name("ActiveListenJSON.cool_down", module_id)}} {{util.var_name("ActiveListenJSON.last_output", module_id)}} )=true) ^refine()      
+        {% block events %}
+            {# Ensure that if we move-on from events, totally leave the node #}
+            {% set leave_events %}
+            {{util.var_name("ActiveListenJSON", module_id)}} = null
+            {% block leave_events_extra_rules %} {# Insert additional rules here #}
+            {% endblock leave_events_extra_rules %}
+            {% endset %}
+                {{util.generate_events(events, additional_move_on_code=leave_events, rule_type='b')}}
+        {% endblock events %}
+    {% endblock final_rules %}
+
+    # on STT Final, reset partial tracker.
+    {# reset partial tracker regardless of cooldown #}
+    a: RESET_PARTIAL_TRACKER(!$eb_state_speechfinal=false {{util.var_name("ActiveListenJSON", module_id)}}!=null)
+        {{util.var_name("ActiveListenJSON.partial_tracker", module_id)}} = ^jsoncreate(permanent object)
+
+
+{% block rules_before_fallback %} {# Insert extra rules needed before fallback #}
+{% endblock rules_before_fallback %}
+
+# We are not expecting to respond to all input, so silent catch all
+{# this is deliberate! #}
+{% block activeListening_fallback %}
+u: FALLBACK(^gbl_fallback())
+    {# non-verbal confirmation #}
+    ^moxie_interested()
+    ^restartTimer()
+{% endblock activeListening_fallback %}
+
+
+
+{% endblock body %}
