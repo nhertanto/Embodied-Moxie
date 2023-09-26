@@ -1,0 +1,135 @@
+# *************************************************************************************
+# README:
+# The Polar Question's node focus is to allow Moxie to anticipate for when the user
+#    says Yes, No, or I don't know. 
+# NOTE:
+#    This jinja file extends from the base_topic.jinja
+#    This file + the base_topic.jinja was created by a teammate!
+#    I only added blocks, such as 'yes_exit_code' so that in the Book Recognizer 
+#    node we can turn off the Book Recognizer properly when moving-on from the convo.
+# *************************************************************************************
+
+## polar question node start ##
+
+{% extends "BaseTemplates/base_topic.jinja" %}
+
+{% block prompt_rule %}  
+	{{super()}}
+	^enableTimerReprompt()
+{% endblock %}
+
+{% block body %}
+
+{% block events %}
+{# generate events & therapy tags if they exist #}
+{{util.generate_events(events, therapy_tag_type, therapy_tag_category, therapy_tag_prompt)}}
+{% endblock %}
+
+{% block polar_rules_before_yes_no %}
+{# space for child extensions to add to this body #}
+{% endblock polar_rules_before_yes_no%}
+
+{% block cant_do_that %}
+{# Optional Rule that Handles "I Can't Do That".  Only added if there is content for it. #}
+{% if ( marked_up_cant_do_that_text or cant_do_that_text) %}
+u: CANT_DO_THAT([ {{cant_do_that_pattern}} {{cant_do_that_designer_patterns}} ])
+
+	{# can't do that output #}
+	{% if marked_up_cant_do_that_text %}
+	{{marked_up_cant_do_that_text}}
+	{% else %}
+	{{cant_do_that_text}}
+	{% endif %}
+
+	{% block cant_exit_code %} {# insert additional code here #}
+	{% endblock cant_exit_code %}
+	{# optional routing for can't do that #}
+	{{util.exit_node(cant_do_that_move_on_output)}}
+
+{% endif %}
+{% endblock %}
+
+{% block idk %}
+u: IDK_POLAR ([{{idk_pattern}} {{idk_designer_patterns}}])
+    {% if marked_up_idk_text -%}{{marked_up_idk_text}}
+    {%- elif idk_text -%}{{idk_text}}
+    {%- else -%}{% block idk_default_text %}{% endblock idk_default_text %}
+    {% endif %}
+    {# I moved therapy tag stuff before move on output because move on could gambit #}
+    {% if (therapy_tag_type and therapy_tag_category) -%}
+	{# therapy_tag_prompt should always be set to something but just being cautious #}
+	^therapyTag({{therapy_tag_type}} {{therapy_tag_category}} {% if therapy_tag_prompt %} {{therapy_tag_prompt}} {% else %}0{% endif %} incorrect)
+	{%- endif %}
+
+	{# set SEL Tags as complete for IDK responses #}
+	{% block idk_sel_tags %}
+	{{ util.complete_sel_tags(idk_sel_tags) }}
+	{% endblock idk_sel_tags %}
+
+	{% block idk_exit_code %} {# insert additional code here #}
+	{% endblock idk_exit_code %}
+	{# exit node #}
+	{{util.exit_node(idk_move_on_output)}}
+{% endblock %}
+
+{% block no %}
+u: NO_POLAR ([{{no_pattern}} {{no_generated_pattern}} {{no_designer_patterns}}])
+    {% if marked_up_no_text -%}{{marked_up_no_text}}
+    {%- elif no_text -%}{{no_text}}
+    {%- else -%}{% block no_default_text %}{% endblock no_default_text %}
+    {% endif %}
+    {# I moved therapy tag stuff before move on output because move on could gambit #}
+    {% if (therapy_tag_type and therapy_tag_category) -%}
+	^therapyTag({{therapy_tag_type}} {{therapy_tag_category}} {% if therapy_tag_prompt %} {{therapy_tag_prompt}} {% else %}0{% endif %} {% if no_therapy_tag_response %} {{no_therapy_tag_response}} {% else %}none{% endif %})
+	{%- endif %}
+
+	{# set SEL Tags as complete for No responses #}
+	{% block no_sel_tags %}
+	{{ util.complete_sel_tags(no_sel_tags) }}
+	{% endblock no_sel_tags %}
+
+	{% block no_exit_code %} {# insert additional code here #}
+	{% endblock no_exit_code %}
+	{# exit node #}
+	{{util.exit_node(no_move_on_output)}}
+{% endblock %}
+
+{% block yes %}
+u: YES_POLAR ([{{yes_pattern}} {{yes_generated_pattern}} {{yes_designer_patterns}}])
+    {% if marked_up_yes_text -%}{{marked_up_yes_text}}
+    {%- else -%}{{yes_text}}
+    {% endif %}
+    {# I moved therapy tag stuff before move on output because move on could gambit #}    
+    {% if (therapy_tag_type and therapy_tag_category) -%}
+	^therapyTag({{therapy_tag_type}} {{therapy_tag_category}} {% if therapy_tag_prompt %} {{therapy_tag_prompt}} {% else %}0{% endif %} {% if yes_therapy_tag_response %} {{yes_therapy_tag_response}} {% else %}none{% endif %})
+	{%- endif %}
+
+	{# set SEL Tags as complete for Yes responses #}
+	{% block yes_sel_tags %}
+	{{ util.complete_sel_tags(yes_sel_tags) }}
+	{% endblock yes_sel_tags %}
+
+	{% block yes_exit_code %} {# insert additional code here #}
+	{% endblock yes_exit_code %}
+	{# exit node #}
+	{% block yes_exit %}
+	{{util.exit_node(yes_move_on_output)}}
+	{% endblock yes_exit %}
+{% endblock %}
+
+{# use custom default response for clarification rule  #}
+{% block clarification_default_response %}
+	^GeneralOutput(OQ_YES_OR_NO)
+{% endblock clarification_default_response %}
+
+{% block reprompt %}
+u: TRIGGER_REPROMPT (eb-wait-complete)
+	^reuse(REPROMPT)
+{% endblock %}
+
+{% block polar_extensions %}
+{# space for child extensions to add to this body #}
+{% endblock polar_extensions %}
+
+## polar question end ##
+{% endblock %}

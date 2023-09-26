@@ -1,0 +1,71 @@
+# *****************************************************************************
+# README:
+# Here's the part of the generated code showcasing the Show Drawing Node
+#   in a Making Friends daily mission.
+# *****************************************************************************
+
+# show drawing node start ##
+## polar question node start ##
+
+topic:  ~DM_1_1_Therapy_unnamed_TemplateNode_FB9C30C6_5DFA_4669_8B43_B12C36AD4341_SHOWDRAWING_Start_Intro   keep repeat   [ eb-dr-event ] 
+t: PROMPT() ^keep() ^repeat()
+    # prompt markup/text
+    [<mark name="cmd:behaviour-tree,data:{+transition+:0.5,+duration+:1.0,+repeat+:1,+layerBlendInTime+:0.5,+layerBlendOutTime+:0.5,+blocking+:false,+action+:4,+variableName+:++,+variableValue+:++,+eventName+:+Gesture_Question+,+lifetime+:0,+category+:+None+,+behaviour+:++,+Track+:++}"/><usel variant="1" genre="motivational">Our first drawing about friendship!</usel><mark name="cmd:behaviour-tree,data:{+transition+:0.5,+duration+:1.0,+repeat+:1,+layerBlendInTime+:0.5,+layerBlendOutTime+:0.5,+blocking+:false,+action+:4,+variableName+:++,+variableValue+:++,+eventName+:+Gesture_Self+,+lifetime+:0,+category+:+None+,+behaviour+:++,+Track+:++}"/><usel variant="0" genre="none"> I'm really excited to see what you've done,</usel><mark name="cmd:behaviour-tree,data:{+transition+:0.5,+duration+:1.0,+repeat+:1,+layerBlendInTime+:0.5,+layerBlendOutTime+:0.5,+blocking+:false,+action+:4,+variableName+:++,+variableValue+:++,+eventName+:+Gesture_Point+,+lifetime+:0,+category+:+None+,+behaviour+:++,+Track+:++}"/><usel variant="1" genre="none"> so will you please hold your drawing up in front of me and say,</usel><mark name="cmd:behaviour-tree,data:{+transition+:0.5,+duration+:1.0,+repeat+:1,+layerBlendInTime+:0.5,+layerBlendOutTime+:0.5,+blocking+:false,+action+:4,+variableName+:++,+variableValue+:++,+eventName+:+Gesture_None+,+lifetime+:0,+category+:+None+,+behaviour+:++,+Track+:++}"/><usel variant="1" genre="none"> Moxie, here's my picture?</usel>]
+	^reset(TOPIC ~DM_1_1_Therapy_unnamed_TemplateNode_FB9C30C6_5DFA_4669_8B43_B12C36AD4341_SHOWDRAWING_Start_Intro)
+	^enableLongTimer()
+	$timedOutCount = 0
+	^eb_enable_draw(true)
+	^eb_start_show(drawing)
+	^enableTimerReprompt()
+u: CLARIFICATION(^gbl_clarification())
+	^GeneralOutput(OQ_YES_OR_NO)
+u: REPROMPT(^gbl_reprompt())
+    # reprompt text
+    [<mark name="cmd:behaviour-tree,data:{+transition+:0.5,+duration+:1.0,+repeat+:1,+layerBlendInTime+:0.5,+layerBlendOutTime+:0.5,+blocking+:false,+action+:4,+variableName+:++,+variableValue+:++,+eventName+:+Gesture_Question+,+lifetime+:0,+category+:+None+,+behaviour+:++,+Track+:++}"/><usel variant="1" genre="motivational">Our first drawing about friendship!</usel><mark name="cmd:behaviour-tree,data:{+transition+:0.5,+duration+:1.0,+repeat+:1,+layerBlendInTime+:0.5,+layerBlendOutTime+:0.5,+blocking+:false,+action+:4,+variableName+:++,+variableValue+:++,+eventName+:+Gesture_Self+,+lifetime+:0,+category+:+None+,+behaviour+:++,+Track+:++}"/><usel variant="0" genre="none"> I'm really excited to see what you've done,</usel><mark name="cmd:behaviour-tree,data:{+transition+:0.5,+duration+:1.0,+repeat+:1,+layerBlendInTime+:0.5,+layerBlendOutTime+:0.5,+blocking+:false,+action+:4,+variableName+:++,+variableValue+:++,+eventName+:+Gesture_Point+,+lifetime+:0,+category+:+None+,+behaviour+:++,+Track+:++}"/><usel variant="1" genre="none"> so will you please hold your drawing up in front of me and say,</usel><mark name="cmd:behaviour-tree,data:{+transition+:0.5,+duration+:1.0,+repeat+:1,+layerBlendInTime+:0.5,+layerBlendOutTime+:0.5,+blocking+:false,+action+:4,+variableName+:++,+variableValue+:++,+eventName+:+Gesture_None+,+lifetime+:0,+category+:+None+,+behaviour+:++,+Track+:++}"/><usel variant="1" genre="none"> Moxie, here's my picture?</usel>]
+u: IDK_SHOW_FACE ([^gbl_moveOn() ^globalPattern_idkBot() ])
+    ^reuse(IDK_POLAR)
+u: NO_SHOW_FACE ([^globalPattern_noBot() ^globalPattern_doNegative() ^globalPattern_childNotWant() (~negation *~3 show)])
+    ^reuse(NO_POLAR)
+u: YES_SHOW_FACE ([^globalPattern_yesBot() ^globalPattern_doAffirmative() ^globalPattern_childWant() (_show @_0- !not)])
+    ^reuse(YES_POLAR)
+u: SUCCESS ( [eb-dr-event (^globalPattern_lookAtBot()) ([ here look there] *~3 {~botname} >) ([I we he she they] *~3 [draw did ~complete made] ) ([here this be it Hughes] *~3 [(it be) letter poem write list story paper picture ~draw art work]) ([I we she he they] *~4 hold) (front *~4 [you ~botname]) (do *~1 [you ~botname] *~4 [~watch ~like think ]) (right [here there] {~botname} >)] )
+	^eb_enable_draw(false)
+	^eb_finish_show(drawing)
+	^enableMediumTimer()
+	^GeneralOutput(SHOW_DRAWING_SHOW)
+    # Exit Node
+    ^gambit(~DM_1_1_Therapy_unnamed_TemplateNode_FB9C30C6_5DFA_4669_8B43_B12C36AD4341_SHOWDRAWING_Start_Moxie_sees_drawing) # Gambit Specific Path
+u: IDK_POLAR ([^gbl_moveOn() ^globalPattern_idkBot() ])
+	^GeneralOutput(SHOW_DRAWING_IDK)
+	^eb_enable_draw(false)
+	^eb_finish_show(drawing)
+    # Exit Node
+    ^gambit(~DM_1_1_Therapy_unnamed_TemplateNode_FB9C30C6_5DFA_4669_8B43_B12C36AD4341_SHOWDRAWING_Start_Moxie_sees_drawing) # Gambit Specific Path
+u: NO_POLAR ([(^globalPattern_noBot())  ])
+	^GeneralOutput(SHOW_DRAWING_NO)
+	^eb_enable_draw(false)
+	^eb_finish_show(drawing)
+    # Exit Node
+    ^gambit(~DM_1_1_Therapy_unnamed_TemplateNode_FB9C30C6_5DFA_4669_8B43_B12C36AD4341_SHOWDRAWING_Start_Template_Exit_AFDE) # Gambit Specific Path
+u: YES_POLAR ([(^globalPattern_yesBot())  ])
+^GeneralOutput(SHOW_DRAWING_YES)
+    # Exit Node
+     # LEGACY EXIT
+	^GeneralOutput(OQ_YES_OR_NO)
+u: TIMED_OUT (eb-wait-complete) ^keep() ^repeat()
+	# Reprompt after 1st time Moxie timed out
+	if($timedOutCount <= 0){
+		^reuse(REPROMPT)
+		$timedOutCount += 1
+		^enableLongTimer()
+	}
+	else {
+		# turn of recognizer and set as timed out
+    ^eb_enable_draw(false)
+    ^eb_finish_show(drawing)
+    # Exit Node
+    ^gambit(~DM_1_1_Therapy_unnamed_TemplateNode_FB9C30C6_5DFA_4669_8B43_B12C36AD4341_SHOWDRAWING_Start_timed_out) # Gambit Specific Path
+		}
+u: FALLBACK (^gbl_fallback()) ^keep() ^repeat()
+	^fallbackHandler()
+## polar question end ##
