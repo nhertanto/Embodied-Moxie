@@ -1,0 +1,285 @@
+# *************************************************************************************
+# README:
+# The Global Command's node is to allow the child to say the Global Command
+#    (important phrases that helps with the Moxie experience), without having
+#    Moxie actually do the thing. This allows the child to practice say the phrase.
+#    (For example, practice saying "Moxie go to sleep" without having Moxie turn off)
+#    In this node, if the Mentor say something irrevalent or say a phrase similar
+#    to the global command, then Moxie would lead the Mentor to say the command
+#    correctly by scaffolding the command (ex. Say "Moxie please"... then "go to sleep")
+# NOTE:
+#    This jinja file extends from the base_topic.jinja
+# *************************************************************************************
+
+# GLOBAL COMMAND NODE START #
+
+{% extends "BaseTemplates/base_topic.jinja" %}
+
+{% block topic_rb_flags %} [ {{global_command.get("topic_flag")}} noPolite ?eb-oov-target handleInterrupt {{topic_flags}}] {% endblock %}
+
+
+{% block prompt_code %}
+{{super()}}
+    {{util.var_name("timed_out_count", module_id)}} = 1 # Ensures we timed out once
+    {{util.var_name("almost_success_attempts", module_id)}} = 3 # Ensures we only do the ALMOST_SUCCESS rule 3 times max
+    {{util.var_name("yes_count", module_id)}} = 1 # Ensures we only say "Yes" once
+    {{util.var_name("didnt_say_moxie_count", module_id)}} = 2 # Ensures we only trigger DIDNT_SAY_MOXIE twice
+    {{util.var_name("no_understand_count", module_id)}} = 2 # Ensures we only trigger NO_UNDERSTAND twice
+    {{util.var_name("gbl_fallback_count", module_id)}} = 3 # Ensures we only do the FALLBACK_HANDLER rule 3 times max
+    ^enableTimerReprompt()
+{% endblock prompt_code %}
+
+
+{% block body %}
+
+# After the Mentor doesn't say anything for a while
+u: TIMED_OUT (eb-wait-complete) ^keep() ^repeat()
+    # Reprompt after 1st time Moxie timed out
+    if({{util.var_name("timed_out_count", module_id)}} > 0){
+        {{util.var_name("timed_out_count", module_id)}} -= 1
+        ^enableLongTimer()
+        ^reuse(REPROMPT)
+    }
+    else {
+        {{util.exit_node(timed_out_move_on_topic)}}
+    }
+
+
+# The child says the chosen Global Command (ex. "Moxie go to sleep")
+u: SUCCESS ({{global_command.get("signal")}})
+    ^analyze(%originalinput)
+    ^refine()
+
+    # The child says "Moxie"
+    a: MOXIE_ONLY (!please ^globalPattern_moxie() >)
+        ^reuse(HEARD_JUST_MOXIE)
+
+    a: SCAFFOLD_PART01_CLOSE_TO_COMMAND ({{util.var_name("scaffold", module_id)}}=1 {{scaffold_part01_designer_patterns}})
+        ^reuse(SCAFFOLD_PART01)
+    
+    a: SCAFFOLD_PART02_CLOSE_TO_COMMAND ({{util.var_name("scaffold", module_id)}}=2 {{scaffold_part02_designer_patterns}})
+        ^reuse(SCAFFOLD_PART02)
+    
+    # The Mentor forgot to say "Moxie" - exit after failing twice
+    a: DIDNT_SAY_MOXIE ($$GC_node_said_Moxie!=true {{global_command.get("moxieless_pattern")}})
+        if({{util.var_name("didnt_say_moxie_count", module_id)}} > 0){
+            {{util.markup_text(didnt_say_moxie_markup, didnt_say_moxie_text)}}
+            {{util.var_name("didnt_say_moxie_count", module_id)}} -= 1
+        }
+        else {
+            {{util.exit_node(failed_all_attempts_move_on_topic)}}
+        }
+
+    # The Mentor said a phrase similar to the Global Command, but it's not exactly perfect (ex. "Good night Moxie")
+    a: CLOSE_TO_COMMAND ({{global_command.get("loose_command")}})
+        ^reuse(ALMOST_SUCCESS)
+    
+    # The Mentor said it perfectly (ex. "Moxie please go to sleep")
+    a: COMPLETE_SUCCESS()
+        ^eb_set_output_type(GLOBAL_COMMAND)
+        ^eb_look_at_speaker(true)
+        {{util.markup_text(success_markup, success_text)}}
+        {{util.exit_node(success_move_on_topic)}}
+
+
+# If the Mentor says part 1 of the scaffolded pattern correctly, say part 2
+u: SCAFFOLD_PART01 ({{util.var_name("scaffold", module_id)}}=1 {{scaffold_part01_designer_patterns}})
+    {{util.markup_text(scaffold_part02_markup, scaffold_part02_text)}}
+    {{util.var_name("scaffold", module_id)}} = 2
+
+
+# If the Mentor says part 2 of the scaffolded pattern correctly, prompt them to say the full command!
+u: SCAFFOLD_PART02 ({{util.var_name("scaffold", module_id)}}=2 {{scaffold_part02_designer_patterns}})
+    {{util.markup_text(scaffold_part03_markup, scaffold_part03_text)}}
+    {{util.var_name("scaffold", module_id)}} = 3
+
+
+# In case asr splits "Moxie" from the rest of the global command
+  # Added !please to prevent the scaffolding parts getting stuck here!
+u: HEARD_JUST_MOXIE(!please ^globalPattern_moxie())
+    ^outputSilence()
+    ^enableShortTimer()
+
+    a: HEARD_REST_OF_COMMAND({{global_command.get("signal")}})
+        $$GC_node_said_Moxie = true
+        ^reuse(SUCCESS)
+
+    a: HEARD_NOTHING_AFTERWARDS(eb-wait-complete)
+        ^reuse(FALLBACK_HANDLER)
+
+
+# In case we get an interrupting  "Moxie" or "Moxie hold on"
+u: MOXIE_INTERRUPT(signal-interrupt)
+    ^outputSilence()
+    ^enableTimerReprompt()
+    ^setrejoinder(HEARD_JUST_MOXIE)
+
+
+# The Mentor almost said the command correctly (ex. "Good night Moxie")
+u: ALMOST_SUCCESS ({{global_command.get("loose_command")}})
+    
+    {{util.var_name("almost_success_attempts", module_id)}} -= 1
+    
+    {# To help Mentors get the command correctly, scaffold it! This is part 1, and only say this once #}
+    if({{util.var_name("almost_success_attempts", module_id)}} == 2){
+        {{util.markup_text(scaffold_part01_markup, scaffold_part01_text)}}
+        {{util.var_name("scaffold", module_id)}} = 1
+    }   
+    {# After 1st attempt, remind them what the full command is. #}
+    else if({{util.var_name("almost_success_attempts", module_id)}} >= 0){
+        {{util.markup_text(reminder_markup, reminder_text)}}
+    }    
+    {# Otherwise, make sure we exit after 3 attempts #}
+    else{
+        {{util.exit_node(failed_all_attempts_move_on_topic)}}
+    }
+
+
+# The Mentor is confused and doesn't understand what to do
+u: NO_UNDERSTAND (!((^globalPattern_doNegative()) *~3 want *~3 do) [(^globalPattern_idkBot()) (~negation * [know understand get (make * sense)]) (^globalPattern_childDontKnowHow()) forgot remind what explain "tell me" {{no_understand_designer_patterns}} ])
+    if ({{util.var_name("no_understand_count", module_id)}} > 0){
+        {{util.markup_text(no_understand_markup, no_understand_text)}}
+        {{util.var_name("no_understand_count", module_id)}} -= 1
+    }
+    else{
+        {{util.exit_node(no_understand_move_on_topic)}}
+    ]
+
+
+# The Mentor can't, or doesn't want to do this now.
+u: CANT_DO_IT ([(^globalPattern_canNegative()) (^globalPattern_noBot()) (^globalPattern_childNoMore()) ((^globalPattern_doNegative()) *~3 want *~3 do) (~not *~3 [do doing]) (^globalPattern_notNow()) ([let can shall] *~3 [do finish complete] *~5 [later tomorrow another other time different not_now]) {{cant_do_it_designer_patterns}}])
+    {{util.markup_text(cant_do_it_markup, cant_do_it_text)}}
+    {{util.exit_node(cant_do_it_move_on_topic)}}   
+
+
+# The Mentor says, "Yes" to show that they understand, but didn't say the command. Stay in node.
+u: YES_UNDERSTAND (^globalPattern_yesBot())
+    {# Only allow the Mentor to say "yes" once #}
+    if ({{util.var_name("yes_count", module_id)}} > 0){
+        {{util.markup_text(yes_understand_markup, yes_understand_text)}}
+        {{util.var_name("yes_count", module_id)}} -= 1
+    }
+    else{
+        ^reuse(FALLBACK_HANDLER)
+    }
+
+
+# If the child says something irrevalent
+u: FALLBACK_HANDLER (^gbl_fallback())
+    {{util.var_name("gbl_fallback_count", module_id)}} -= 1
+    {# 1st time Mentor hits fallback, do CLARIFICATION #}
+    if ({{util.var_name("gbl_fallback_count", module_id)}} == 2){
+        # Flush output to check if we have an output with CLARIFICATION
+        ^flushoutput()
+        $_response = %response
+        ^reuse(CLARIFICATION)
+        # if reprompt signal does not match rule in local context, must produce some output
+        if($_response == %response)
+        {
+            # If there's nothing written in CLARIFICATION, use text in NO_UNDERSTAND
+            {{util.markup_text(no_understand_markup, no_understand_text)}}
+        }
+    }
+    {# 2nd time, start the scaffolding #}
+    else if({{util.var_name("gbl_fallback_count", module_id)}} > 0){
+        {{util.markup_text(scaffold_part01_markup, scaffold_part01_text)}}
+        {{util.var_name("scaffold", module_id)}} = 1
+    }
+    {# Move along the conversation #}
+    else{
+        {{util.exit_node(failed_all_attempts_move_on_topic)}}
+    }
+
+{% endblock body %}
+
+# *************************************************************************************
+# NOTES ABOUT BELOW:
+#   topic flag: Ensures that Moxie doesn't actually 'go to sleep' when the child says 
+#               this phrase.
+#   signal: If we hit this rule, the child must have said the global command
+#   moxieless_pattern: The command, but missing "Moxie" (ex. "Please go to sleep")
+#   loose_command: A phrase similar to the global command (ex. "Good night Moxie")
+# *************************************************************************************
+
+
+{# Scroll-down menu for the available Global Commands #}
+{% if chosen_global_command == 'Sleep' %}
+    {% set global_command = ({
+        "topic_flag": "handleSleep", 
+        "signal": "signal-sleep", 
+        "moxieless_pattern": "^fallbackPattern_noBotNameSleep()", 
+        "loose_command": "^fallbackPattern_gcSleep()" 
+        }) %}
+{% elif chosen_global_command == 'SomethingElse' %}
+    {% set global_command = ({
+        "topic_flag": "handleQuit", 
+        "signal": "signal-quit", 
+        "moxieless_pattern": "^fallbackPattern_noBotNameQuit()", 
+        "loose_command": "^fallbackPattern_gcSomethingElse()"
+        }) %}
+{% elif chosen_global_command == 'ListenToMe' %}
+    {% set global_command = ({
+        "topic_flag": "handleLook", 
+        "signal": "signal-look", 
+        "moxieless_pattern": "^fallbackPattern_noBotNameListenToMe()", 
+        "loose_command": "^fallbackPattern_gcListenToMe()"
+        }) %}
+{% elif chosen_global_command == 'Earmuffs' %}
+    {% set global_command = ({
+        "topic_flag": "handleEarmuffs", 
+        "signal": "signal-earmuffs", 
+        "moxieless_pattern": "^fallbackPattern_noBotNameStopListening()", 
+        "loose_command": "^fallbackPattern_gcEarmuffs()"
+        }) %}
+{% elif chosen_global_command == 'HoldOn' %}
+    {% set global_command = ({
+        "topic_flag": "handleInterrupt", 
+        "signal": "signal-interrupt",  
+        "moxieless_pattern": "^fallbackPattern_noBotNameHoldOn()", 
+        "loose_command": "^fallbackPattern_gcHoldOn()"
+        }) %}
+{% elif chosen_global_command == 'RepeatThat' %}
+    {% set global_command = ({
+        "topic_flag": "handleRepeat", 
+        "signal": "signal-repeat",  
+        "moxieless_pattern": "^fallbackPattern_noBotNameRepeat()",
+        "loose_command": "^fallbackPattern_gcRepeat()"
+        }) %}
+{% elif chosen_global_command == 'SpeakLouder' %}
+    {% set global_command = ({
+        "topic_flag": "handleLouder", 
+        "signal": "signal-louder", 
+        "moxieless_pattern": "^fallbackPattern_noBotNameVolumeUp()", 
+        "loose_command": "^fallbackPattern_gcVolumeUp()"
+        }) %}
+{% elif chosen_global_command == 'SpeakSofter' %}
+    {% set global_command = ({
+        "topic_flag": "handleQuieter", 
+        "signal": "signal-quieter",  
+        "moxieless_pattern": "^fallbackPattern_noBotNameVolumeDown()", 
+        "loose_command": "^fallbackPattern_gcVolumeDown()"
+        }) %}
+{% elif chosen_global_command == 'Hello' %}
+    {% set global_command = ({
+        "topic_flag": "", 
+        "signal": "([(^globalCommand_softReset()) (^globalPattern_childGreeting())])",  
+        "moxieless_pattern": "^fallbackPattern_noBotNameHello()", 
+        "loose_command": "^fallbackPattern_gcHello()"
+        }) %}
+{% elif chosen_global_command == 'WakeUp' %}
+    {% set global_command = ({
+        "topic_flag": "", 
+        "signal": "^globalCommand_wakeUp()",  
+        "moxieless_pattern": "^fallbackPattern_noBotNameWakeUp()", 
+        "loose_command": "^fallbackPattern_gcWakeUp()"
+        }) %}
+{% else %}
+    {% set global_command = ({
+        "topic_flag": "handleSleep", 
+        "signal": "signal-sleep", 
+        "moxieless_pattern": "^fallbackPattern_noBotNameSleep()",
+        "loose_command": "^fallbackPattern_gcSleep()"
+        }) %}
+{% endif %}
+
+# GLOBAL COMMAND NODE END #
