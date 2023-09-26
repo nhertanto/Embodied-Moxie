@@ -1,0 +1,55 @@
+# *************************************************************************************
+# README:
+# Here's the part of the generated code showcasing the Repeat Mentor Speech Node
+#   in the Jokes Activity. Here, the child wants to tell Moxie a Knock knock
+#   joke and the node will allow Moxie to repeat the child.
+# *************************************************************************************
+
+topic:  ~JOKE_Entry_Mentor_tell_Joke_knock   keep repeat   [] 
+t: PROMPT() ^keep() ^repeat()
+    # prompt markup variations
+    [ <usel variant="0" genre="question">Who's there?</usel> ]
+    [ <usel variant="3" genre="question">Who's there?</usel> ]
+    [ <usel variant="4" genre="question">Who's there?</usel> ]
+    $T_JOKEJSON.Mentor_speech = null
+u: CLARIFICATION(^gbl_clarification())
+    # no clarification output provided
+u: REPROMPT(^gbl_reprompt())
+    # reprompt text
+    <usel variant="0" genre="question">Who's there?</usel>
+# Mentor says anything!
+u: SET_MENTOR_SPEECH (^gbl_fallback()) ^keep() ^repeat()
+    ^eb_set_output_type(BASE_CASE)
+    $T_JOKEJSON.Mentor_speech = ^eb_fallback_speech_input()
+    ^analyze($T_JOKEJSON.Mentor_speech)
+    ^reuse(SAY_MENTOR_SPEECH)
+u: SAY_MENTOR_SPEECH ($CONST_alwaysFalse=true)  ^keep() ^repeat() ^sequence()
+    a: FILTER_BLACKLIST (_~blacklist) ^keep() ^repeat()
+        ^unmark(* _0)
+        $T_JOKEJSON.Mentor_speech = ^substitute(CHARACTER $T_JOKEJSON.Mentor_speech '_0 "")
+        ^retry(FILTER_BLACKLIST)
+    # Moxie repeats whatever the Mentor said!
+    a: MOXIE_REPEATS_MENTOR_SPEECH () ^keep() ^repeat() 
+        $T_JOKEJSON.Mentor_speech
+        ^eb_set_output_type(CATCH_ALL)
+    # Exit Node
+    ^gambit(~JOKE_Entry_Mentor_tell_Joke_unnamed_Node_7961081A_13FE_441B_A2DE_4133D9F8B086) # Gambit Specific Path
+
+topic:  ~JOKE_Entry_Mentor_tell_Joke_unnamed_Node_7961081A_13FE_441B_A2DE_4133D9F8B086   keep repeat   [] 
+t: PROMPT() ^keep() ^repeat()
+    # prompt markup/text
+    [<usel variant="0" genre="question">Who? </usel>]
+[<usel variant="1" genre="question"> Who? </usel>]
+[<usel variant="3" genre="question"> Who? </usel>]
+u: CLARIFICATION(^gbl_clarification())
+    # no clarification output provided
+u: REPROMPT(^gbl_reprompt())
+    # reprompt text
+    [<usel variant="0" genre="question"> $T_JOKEJSON.Mentor_speech   Who? </usel>]
+[<usel variant="1" genre="question"> $T_JOKEJSON.Mentor_speech   Who? </usel>]
+[<usel variant="3" genre="question"> $T_JOKEJSON.Mentor_speech   Who? </usel>]
+### Start - BaseTemplates/response_loop.jinja ###
+u: HAHA_SO_FUNNY_MENTOR ((^gbl_fallback())) 
+    # no output
+    ^gambit(~JOKE_Entry_Mentor_tell_Joke_haha_so_funny_mentor)
+### End - BaseTemplates/response_loop.jinja ###
