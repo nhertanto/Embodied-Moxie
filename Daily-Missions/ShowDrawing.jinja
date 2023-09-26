@@ -1,6 +1,6 @@
 # *************************************************************************************
 # README:
-# The Show Drawing's node focus is to allow the child to show Moxie a drawing, as long
+# The Show Drawings node focus is to allow the child to show Moxie a drawing, as long
 #    as their drawing is on the special paper with a special QR code.
 #    Otherwise, as long as the Mentor says a phrase similar to "Here's my drawing"
 #    then we should move along the conversation.
@@ -11,7 +11,7 @@
 ## show drawing node start ##
 {% extends "BaseTemplates/base_show.jinja" %}
 
-# Listen for the eb-dr-event to see if the child showed Moxie a drawing with a QR code.
+{# Listen for the eb-dr-event to see if the child showed Moxie a drawing with a QR code. #}
 {% block topic_rb_flags %} [ eb-dr-event {{topic_flags}}] {% endblock %}
 
 {# Turning on the drawing recognizer when entering this node #}
@@ -29,13 +29,14 @@
 {% endif %}
 {% endblock reprompt_content %}
 
+{# If we move-on from timing out, turn off drawing recognizer #}
 {% block timed_out_exit_code %}
     ^eb_enable_draw(false)
     ^eb_finish_show(drawing)
 {% endblock timed_out_exit_code %}
 
 {% block events %}
-{# For events, if we move-on, turn off face recognizer #}
+{# For events, if we move-on, turn off drawing recognizer #}
 {% set recognizer_off %}
     ^eb_enable_draw(false)
     ^eb_finish_show(drawing)
