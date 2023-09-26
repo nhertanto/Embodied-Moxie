@@ -1,0 +1,82 @@
+# *************************************************************************************
+# README:
+# As a game designer, I help create 'patterns,' specific phrases that Moxie would
+#    listen to enter into the Animal Breathing activity!
+#    In this activity, we have several different animals that the child can breathe as.
+#    I took into account for all the different animals so that the child can enter
+#    the activity and right away do the specific animal breathing they want.
+#    Otherwise, if the child says the default, "Can we do animal breathing?" then
+#    we'll enter the activity and once we enter, Moxie will ask the child which 
+#    animal they'd like to breathe as.
+# *************************************************************************************
+
+# lets do bee breathing
+patternmacro: ^AB_module_entry_BUMBLEBEE()
+[
+[  ( ![no shape ~negation] {~botname} ^intentPattern_request() *~3 {a} [bee be bumblebee] [breath breaths breathe breathing])( ![no shape  ~negation] {~botname} ^intentPattern_request() *~3 breathe *~2 {a} [bee be bumblebee])( ![no shape  ~negation] {~botname} < *~6 [may shall can will would] [you we I ~botname] *~3 {a} [bee be bumblebee] [breath breaths breathe breathing])(![no shape ~negation] want *~3 {a} [bee be bumblebee] [breath breaths breathe breathing])([bee be bumblebee] [breath breaths breathe breathing] [with_me party] {please} {~botName} >)(!shape < {~botName} do [you ~botName] {know_how_to} *~2 [bee be bumblebee] [breath breaths breathe breathing] {~botName} >) (!shape < [([~botName do] [bee be bumblebee]) doobie] [breath breaths breathe breathing] {please} >)]
+]
+
+# lets do cat breathing
+patternmacro: ^AB_module_entry_CAT()
+[
+[  ( ![no shape ~negation] {~botname} ^intentPattern_request() *~3 {a} ~cat ~ab_breaths)( ![no shape  ~negation] {~botname} ^intentPattern_request() *~3 ~ab_breaths *~2 {a} ~cat)( ![no shape  ~negation] {~botname} < *~6 [may shall can will would] [you we I ~botname] *~3 {a} ~cat ~ab_breaths)(![no shape ~negation] want *~3 {a} ~cat ~ab_breaths)(~cat ~ab_breaths [with_me party] {please} {~botName} >)(!shape < {~botName} do [you ~botName] {know_how_to} *~2 ~cat ~ab_breaths {~botName} >) (!shape < {~botname}{please} *~1 ~cat ~ab_breaths {please}{~botname} >)]
+]
+
+# lets do dragon breathing
+patternmacro: ^AB_module_entry_DRAGON()
+[
+[  ( ![no shape ~negation] {~botname} ^intentPattern_request() *~3 {a} dragon [breath breaths breathe breathing])( ![no shape  ~negation] {~botname} ^intentPattern_request() *~3 breathe *~2 {a} dragon)( ![no shape  ~negation] {~botname} < *~6 [may shall can will would] [you we I ~botname] *~3 {a} dragon [breath breaths breathe breathing])(![no shape ~negation] want *~3 {a} dragon [breath breaths breathe breathing])(dragon [breath breaths breathe breathing] [with_me party] {please} {~botName} >)(!shape < {~botName} do [you ~botName] {know_how_to} *~2 dragon [breath breaths breathe breathing] {~botName} >) (!shape < ~botName dragon [breath breaths breathe breathing] {please} >)]
+]
+
+# lets do lion breathing
+patternmacro: ^AB_module_entry_LION()
+[
+[  ( ![no shape ~negation] {~botname} ^intentPattern_request() *~3 {a} lion [breath breaths breathe breathing])( ![no shape  ~negation] {~botname} ^intentPattern_request() *~3 breathe *~2 {a} lion)( ![no shape  ~negation] {~botname} < *~6 [may shall can will would] [you we I ~botname] *~3 {a} lion [breath breaths breathe breathing])(![no shape ~negation] want *~3 {a} lion [breath breaths breathe breathing])(lion [breath breaths breathe breathing] [with_me party] {please} {~botName} >)(!shape < {~botName} do [you ~botName] {know_how_to} *~2 lion [breath breaths breathe breathing] {~botName} >) (!shape < ~botName lion [breath breaths breathe breathing] {please} >)]
+]
+
+# lets do bunny breathing
+patternmacro: ^AB_module_entry_BUNNY()
+[
+[  ( ![no shape ~negation] {~botname} ^intentPattern_request() *~3 {a} [bunny rabbit] [breath breaths breathe breathing])( ![no shape  ~negation] {~botname} ^intentPattern_request() *~3 breathe *~2 {a} [bunny rabbit])( ![no shape  ~negation] {~botname} < *~6 [may shall can will would] [you we I ~botname] *~3 {a} [bunny rabbit] [breath breaths breathe breathing])(![no shape ~negation] want *~3 {a} [bunny rabbit] [breath breaths breathe breathing])([bunny rabbit] [breath breaths breathe breathing] [with_me party] {please} {~botName} >)(!shape < {~botName} do [you ~botName] {know_how_to} *~2 [bunny rabbit] [breath breaths breathe breathing] {~botName} >) (!shape < ~botName [bunny rabbit] [breath breaths breathe breathing] {please} >)]
+]
+
+# lets do snake breathing
+patternmacro: ^AB_module_entry_SNAKE()
+[
+[  ( ![no shape ~negation] {~botname} ^intentPattern_request() *~3 {a} snake [breath breaths breathe breathing])( ![no shape  ~negation] {~botname} ^intentPattern_request() *~3 breathe *~2 {a} snake)( ![no shape  ~negation] {~botname} < *~6 [may shall can will would] [you we I ~botname] *~3 {a} snake [breath breaths breathe breathing])(![no shape ~negation] want *~3 {a} snake [breath breaths breathe breathing])(snake [breath breaths breathe breathing] [with_me party] {please} {~botName} >)(!shape < {~botName} do [you ~botName] {know_how_to} *~2 snake [breath breaths breathe breathing] {~botName} >) (!shape < ~botName snake [breath breaths breathe breathing] {please} >)]
+]
+
+# lets do whale breathing
+patternmacro: ^AB_module_entry_WHALE()
+[
+[  ( ![no shape ~negation] {~botname} ^intentPattern_request() *~3 {a} whale [breath breaths breathe breathing])( ![no shape  ~negation] {~botname} ^intentPattern_request() *~3 breathe *~2 {a} whale)( ![no shape  ~negation] {~botname} < *~6 [may shall can will would] [you we I ~botname] *~3 {a} whale [breath breaths breathe breathing])(![no shape ~negation] want *~3 {a} whale [breath breaths breathe breathing])(whale [breath breaths breathe breathing] [with_me party] {please} {~botName} >)(!shape < {~botName} do [you ~botName] {know_how_to} *~2 whale [breath breaths breathe breathing] {~botName} >) (!shape < ~botName whale [breath breaths breathe breathing] {please} >)]
+]
+
+# I want to do wolf breathing
+patternmacro: ^AB_module_entry_WOLF()
+[
+[  ( ![no shape ~negation] {~botname} ^intentPattern_request() *~3 {a} wolf [breath breaths breathe breathing])( ![no shape  ~negation] {~botname} ^intentPattern_request() *~3 breathe *~2 {a} wolf)( ![no shape  ~negation] {~botname} < *~6 [may shall can will would] [you we I ~botname] *~3 {a} wolf [breath breaths breathe breathing])(![no shape ~negation] want *~3 {a} wolf [breath breaths breathe breathing])(wolf [breath breaths breathe breathing] [with_me party] {please} {~botName} >)(!shape < {~botName} do [you ~botName] {know_how_to} *~2 wolf [breath breaths breathe breathing] {~botName} >) (!shape < ~botName wolf [breath breaths breathe breathing] {please} >)]
+]
+
+# lets do rooster breathing
+patternmacro: ^AB_module_entry_ROOSTER()
+[
+[  ( ![no shape ~negation] {~botname} ^intentPattern_request() *~3 {a} [rooster chicken] [breath breaths breathe breathing])( ![no shape  ~negation] {~botname} ^intentPattern_request() *~3 breathe *~2 {a} [rooster chicken])( ![no shape  ~negation] {~botname} < *~6 [may shall can will would] [you we I ~botname] *~3 {a} [rooster chicken] [breath breaths breathe breathing])(![no shape ~negation] want *~3 {a} [rooster chicken] [breath breaths breathe breathing])([rooster chicken] [breath breaths breathe breathing] [with_me party] {please} {~botName} >)(!shape < {~botName} do [you ~botName] {know_how_to} *~2 [rooster chicken] [breath breaths breathe breathing] {~botName} >) (!shape < ~botName [rooster chicken] [breath breaths breathe breathing] {please} >)]
+]
+
+# lets do bear breathing
+patternmacro: ^AB_module_entry_BEAR()
+[
+[  ( ![no shape ~negation] {~botname} ^intentPattern_request() *~3 {a} bear [breath breaths breathe breathing])( ![no shape  ~negation] {~botname} ^intentPattern_request() *~3 breathe *~2 {a} bear)( ![no shape  ~negation] {~botname} < *~6 [may shall can will would] [you we I ~botname] *~3 {a} bear [breath breaths breathe breathing])(![no shape ~negation] want *~3 {a} bear [breath breaths breathe breathing])(bear [breath breaths breathe breathing] [with_me party] {please} {~botName} >)(!shape < {~botName} do [you ~botName] {know_how_to} *~2 bear [breath breaths breathe breathing] {~botName} >) (!shape < ~botName bear [breath breaths breathe breathing] {please} >)]
+]
+
+# let us do animal breathing
+# I want animal breaths
+# can we do animal breaths
+# I want to do a animal breath
+# let us breathe like a animal
+# Moxie animal breaths
+patternmacro: ^AB_module_entry_DEFAULT()
+[
+(![no shape ~negation ([your I] [favorite like love]) (show [me us])] [({~botname} ^intentPattern_request() {try} *~3 breathe *~2 {a} {[~different change other another new]} animal %tense=present) ({~botname} [may shall can will would let] [you we I ~botname] {try} *~3 {a} {[~different change other another new]} animal ~ab_breaths %tense=present) (< {~botName} do [you ~botName] {know_how_to} *~3  {[~different change other another new]} animal ~ab_breaths {~botName} > %tense=present) (< ~botName *~1 {[~different change other another new]} animal ~ab_breaths {[with_me party]} {please} > %tense=present)(< {please} *~1 {[~different change other another new]} animal ~ab_breaths ~botName {[with_me party]} {please} > %tense=present)([I we] [want (will {[like love]})] *~3 {try} {a}  {[~different change other another new]} animal ~ab_breaths)([I we] [want (will {[like love]})] *~5 [~ab_breaths do] *~3 {[~different change other another new]} animal ~ab_breaths) ])
+]
