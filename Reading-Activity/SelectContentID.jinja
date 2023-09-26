@@ -21,9 +21,9 @@
 {% for index_tbl in index_tables %}
 
 {% for row in index_tbl.content_indices if row[pattern_column] != "" %}
-# row.csv_dict
+{# row.csv_dict #}
 u: {{row.csv_dict.content_id|upper()}} ( {{row.csv_dict[pattern_column]}} )
-    # Niken: I added the below code to allow Moxie to recognize a specific variable for the Reading Activity
+    {# Niken: I added the below code to allow Moxie to recognize a specific variable for the Reading Activity #}
     {% if row.csv_dict.output_type|upper() %}
     ^eb_set_output_type({{row.csv_dict.output_type|upper()}})
     {% endif %}
