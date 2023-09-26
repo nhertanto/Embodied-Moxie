@@ -1,0 +1,111 @@
+# *************************************************************************************
+# README:
+# The Show Drawing's node focus is to allow the child to show Moxie a drawing, as long
+#    as their drawing is on the special paper with a special QR code.
+#    Otherwise, as long as the Mentor says a phrase similar to "Here's my drawing"
+#    then we should move along the conversation.
+# NOTE:
+#    This jinja file extends from the base_show.jinja
+# *************************************************************************************
+
+## show drawing node start ##
+{% extends "BaseTemplates/base_show.jinja" %}
+
+# Listen for the eb-dr-event to see if the child showed Moxie a drawing with a QR code.
+{% block topic_rb_flags %} [ eb-dr-event {{topic_flags}}] {% endblock %}
+
+{# Turning on the drawing recognizer when entering this node #}
+{% block prompt_code %}
+	{{super()}}
+	^eb_enable_draw(true)
+	^eb_start_show(drawing)
+{% endblock prompt_code %}
+
+{% block reprompt_content %}
+{% if (not reprompt_text) -%}
+	^GeneralOutput(SHOW_DRAWING_TIMER)
+{% else %}
+	{{util.reprompt(reprompt_text)}}
+{% endif %}
+{% endblock reprompt_content %}
+
+{% block timed_out_exit_code %}
+    ^eb_enable_draw(false)
+    ^eb_finish_show(drawing)
+{% endblock timed_out_exit_code %}
+
+{% block events %}
+{# For events, if we move-on, turn off face recognizer #}
+{% set recognizer_off %}
+    ^eb_enable_draw(false)
+    ^eb_finish_show(drawing)
+{% endset %}
+{{util.generate_events(events, additional_move_on_code=recognizer_off)}}
+{% endblock %}
+
+{# Giving the polar YES and NO rules their own pattern without altering the default patterns in their respective templates #}
+{% block polar_rules_before_yes_no %}
+u: IDK_SHOW_FACE ([{{idk_pattern}} {{idk_designer_patterns}}])
+    ^reuse(IDK_POLAR)
+
+u: NO_SHOW_FACE ([^globalPattern_noBot() ^globalPattern_doNegative() ^globalPattern_childNotWant() (~negation *~3 show)])
+    ^reuse(NO_POLAR)
+
+u: YES_SHOW_FACE ([^globalPattern_yesBot() ^globalPattern_doAffirmative() ^globalPattern_childWant() (_show @_0- !not)])
+    ^reuse(YES_POLAR)
+
+{{super()}}
+{% endblock polar_rules_before_yes_no %}
+
+{# If user don't give text for IDK or NO, use the General Output. Also, turn off recognizer when leaving #}
+{% block idk_default_text %}
+	^GeneralOutput(SHOW_DRAWING_IDK)
+{% endblock idk_default_text %}
+
+{% block idk_exit_code %}
+	^eb_enable_draw(false)
+	^eb_finish_show(drawing)
+{% endblock idk_exit_code %}
+
+{% block no_default_text %}
+	^GeneralOutput(SHOW_DRAWING_NO)
+{% endblock no_default_text %}
+
+{% block no_exit_code %}
+	^eb_enable_draw(false)
+	^eb_finish_show(drawing)
+{% endblock no_exit_code %}
+
+{% block yes_exit_code %}
+{# If user don't give text or move-on for YES, use the GeneralOutput #}
+{% if ((not marked_up_yes_text) and (not yes_text) and (not yes_move_on_output)) -%}
+     ^GeneralOutput(SHOW_DRAWING_YES)
+{% endif %}
+{# If there's a YES move-on, make sure to turn off drawing recognizer #}
+{% if (yes_move_on_output) -%}
+    ^eb_enable_draw(false)
+    ^eb_finish_show(drawing)
+{% endif %}
+{% endblock yes_exit_code %}
+
+{# If Moxie sees the Drawing's QR code #}
+{% block success_pattern %} [eb-dr-event {{show_drawing_pattern}}] {% endblock success_pattern %}
+{% block success_text %}
+	^eb_enable_draw(false)
+	^eb_finish_show(drawing)
+	^enableMediumTimer()
+	{% if marked_up_show_drawing_text %}
+	{{marked_up_show_drawing_text}}
+	{% elif show_drawing_text %}
+	{{show_drawing_text}}
+	{% else %}
+	^GeneralOutput(SHOW_DRAWING_SHOW)
+	{% endif %}
+	{{util.exit_node(show_drawing_move_on_topic)}}
+{% endblock success_text %}
+
+{% block fallback_handler %}
+	^fallbackHandler()
+{% endblock fallback_handler %}
+
+## show drawing end ##
