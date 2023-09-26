@@ -1,17 +1,17 @@
 # *************************************************************************************
 # README:
-# The Global Command's node focus is to allow the child to say the Global Command
+# The Global Commands node focus is to allow the child to say the Global Command
 #    (important phrases that helps with the Moxie experience), without having
 #    Moxie actually do the thing. This allows the child to practice say the phrase.
-#    (For example, practice saying "Moxie go to sleep" without having Moxie turn off)
+#    (For example, practice saying 'Moxie go to sleep' without having Moxie turn off)
 #    In this node, if the Mentor say something irrevalent or say a phrase similar
 #    to the global command, then Moxie would lead the Mentor to say the command
-#    correctly by scaffolding the command (ex. Say "Moxie please"... then "go to sleep")
+#    correctly by scaffolding the command (ex. Say Moxie please ... go to sleep)
 # NOTE:
 #    This jinja file extends from the base_topic.jinja
 # *************************************************************************************
 
-# GLOBAL COMMAND NODE START #
+{# GLOBAL COMMAND NODE START #}
 
 {% extends "BaseTemplates/base_topic.jinja" %}
 
@@ -20,7 +20,7 @@
 
 {% block prompt_code %}
 {{super()}}
-    {{util.var_name("timed_out_count", module_id)}} = 1 # Ensures we timed out once
+    {{util.var_name("timed_out_count", module_id)}} = 1 {# Ensures we timed out once #}
     {{util.var_name("almost_success_attempts", module_id)}} = 3 # Ensures we only do the ALMOST_SUCCESS rule 3 times max
     {{util.var_name("yes_count", module_id)}} = 1 # Ensures we only say "Yes" once
     {{util.var_name("didnt_say_moxie_count", module_id)}} = 2 # Ensures we only trigger DIDNT_SAY_MOXIE twice
@@ -32,7 +32,7 @@
 
 {% block body %}
 
-# After the Mentor doesn't say anything for a while
+{# After the Mentor doesn't say anything for a while #}
 u: TIMED_OUT (eb-wait-complete) ^keep() ^repeat()
     # Reprompt after 1st time Moxie timed out
     if({{util.var_name("timed_out_count", module_id)}} > 0){
@@ -45,22 +45,22 @@ u: TIMED_OUT (eb-wait-complete) ^keep() ^repeat()
     }
 
 
-# The child says the chosen Global Command (ex. "Moxie go to sleep")
+{# The child says the chosen Global Command (ex. "Moxie go to sleep") #}
 u: SUCCESS ({{global_command.get("signal")}})
     ^analyze(%originalinput)
     ^refine()
 
-    # The child says "Moxie"
+    {# The child says "Moxie" #}
     a: MOXIE_ONLY (!please ^globalPattern_moxie() >)
         ^reuse(HEARD_JUST_MOXIE)
-
+    {# Scaffold the command if the Mentor doesn't say it right -- part 1 #}
     a: SCAFFOLD_PART01_CLOSE_TO_COMMAND ({{util.var_name("scaffold", module_id)}}=1 {{scaffold_part01_designer_patterns}})
         ^reuse(SCAFFOLD_PART01)
-    
+    {# Scaffold the command if the Mentor doesn't say it right -- part 2 #}
     a: SCAFFOLD_PART02_CLOSE_TO_COMMAND ({{util.var_name("scaffold", module_id)}}=2 {{scaffold_part02_designer_patterns}})
         ^reuse(SCAFFOLD_PART02)
     
-    # The Mentor forgot to say "Moxie" - exit after failing twice
+    {# The Mentor forgot to say "Moxie" - exit after failing twice #}
     a: DIDNT_SAY_MOXIE ($$GC_node_said_Moxie!=true {{global_command.get("moxieless_pattern")}})
         if({{util.var_name("didnt_say_moxie_count", module_id)}} > 0){
             {{util.markup_text(didnt_say_moxie_markup, didnt_say_moxie_text)}}
@@ -70,11 +70,11 @@ u: SUCCESS ({{global_command.get("signal")}})
             {{util.exit_node(failed_all_attempts_move_on_topic)}}
         }
 
-    # The Mentor said a phrase similar to the Global Command, but it's not exactly perfect (ex. "Good night Moxie")
+    {# The Mentor said a phrase similar to the Global Command, but it's not exactly perfect (ex. "Good night Moxie") #}
     a: CLOSE_TO_COMMAND ({{global_command.get("loose_command")}})
         ^reuse(ALMOST_SUCCESS)
     
-    # The Mentor said it perfectly (ex. "Moxie please go to sleep")
+    {# The Mentor said it perfectly (ex. "Moxie please go to sleep") #}
     a: COMPLETE_SUCCESS()
         ^eb_set_output_type(GLOBAL_COMMAND)
         ^eb_look_at_speaker(true)
@@ -82,20 +82,20 @@ u: SUCCESS ({{global_command.get("signal")}})
         {{util.exit_node(success_move_on_topic)}}
 
 
-# If the Mentor says part 1 of the scaffolded pattern correctly, say part 2
+{# If the Mentor says part 1 of the scaffolded pattern correctly, say part 2 #}
 u: SCAFFOLD_PART01 ({{util.var_name("scaffold", module_id)}}=1 {{scaffold_part01_designer_patterns}})
     {{util.markup_text(scaffold_part02_markup, scaffold_part02_text)}}
     {{util.var_name("scaffold", module_id)}} = 2
 
 
-# If the Mentor says part 2 of the scaffolded pattern correctly, prompt them to say the full command!
+{# If the Mentor says part 2 of the scaffolded pattern correctly, prompt them to say the full command! #}
 u: SCAFFOLD_PART02 ({{util.var_name("scaffold", module_id)}}=2 {{scaffold_part02_designer_patterns}})
     {{util.markup_text(scaffold_part03_markup, scaffold_part03_text)}}
     {{util.var_name("scaffold", module_id)}} = 3
 
 
-# In case asr splits "Moxie" from the rest of the global command
-  # Added !please to prevent the scaffolding parts getting stuck here!
+{# In case asr splits "Moxie" from the rest of the global command #}
+{#     Added !please to prevent the scaffolding parts getting stuck here! #}
 u: HEARD_JUST_MOXIE(!please ^globalPattern_moxie())
     ^outputSilence()
     ^enableShortTimer()
@@ -108,14 +108,14 @@ u: HEARD_JUST_MOXIE(!please ^globalPattern_moxie())
         ^reuse(FALLBACK_HANDLER)
 
 
-# In case we get an interrupting  "Moxie" or "Moxie hold on"
+{# In case we get an interrupting  "Moxie" or "Moxie hold on" #}
 u: MOXIE_INTERRUPT(signal-interrupt)
     ^outputSilence()
     ^enableTimerReprompt()
     ^setrejoinder(HEARD_JUST_MOXIE)
 
 
-# The Mentor almost said the command correctly (ex. "Good night Moxie")
+{# The Mentor almost said the command correctly (ex. "Good night Moxie") #}
 u: ALMOST_SUCCESS ({{global_command.get("loose_command")}})
     
     {{util.var_name("almost_success_attempts", module_id)}} -= 1
@@ -135,7 +135,7 @@ u: ALMOST_SUCCESS ({{global_command.get("loose_command")}})
     }
 
 
-# The Mentor is confused and doesn't understand what to do
+{# The Mentor is confused and doesn't understand what to do #}
 u: NO_UNDERSTAND (!((^globalPattern_doNegative()) *~3 want *~3 do) [(^globalPattern_idkBot()) (~negation * [know understand get (make * sense)]) (^globalPattern_childDontKnowHow()) forgot remind what explain "tell me" {{no_understand_designer_patterns}} ])
     if ({{util.var_name("no_understand_count", module_id)}} > 0){
         {{util.markup_text(no_understand_markup, no_understand_text)}}
@@ -146,13 +146,13 @@ u: NO_UNDERSTAND (!((^globalPattern_doNegative()) *~3 want *~3 do) [(^globalPatt
     ]
 
 
-# The Mentor can't, or doesn't want to do this now.
+{# The Mentor can't, or doesn't want to do this now. #}
 u: CANT_DO_IT ([(^globalPattern_canNegative()) (^globalPattern_noBot()) (^globalPattern_childNoMore()) ((^globalPattern_doNegative()) *~3 want *~3 do) (~not *~3 [do doing]) (^globalPattern_notNow()) ([let can shall] *~3 [do finish complete] *~5 [later tomorrow another other time different not_now]) {{cant_do_it_designer_patterns}}])
     {{util.markup_text(cant_do_it_markup, cant_do_it_text)}}
     {{util.exit_node(cant_do_it_move_on_topic)}}   
 
 
-# The Mentor says, "Yes" to show that they understand, but didn't say the command. Stay in node.
+{# The Mentor says, "Yes" to show that they understand, but didn't say the command. Stay in node. #}
 u: YES_UNDERSTAND (^globalPattern_yesBot())
     {# Only allow the Mentor to say "yes" once #}
     if ({{util.var_name("yes_count", module_id)}} > 0){
@@ -164,19 +164,19 @@ u: YES_UNDERSTAND (^globalPattern_yesBot())
     }
 
 
-# If the child says something irrevalent
+{# If the child says something irrevalent #}
 u: FALLBACK_HANDLER (^gbl_fallback())
     {{util.var_name("gbl_fallback_count", module_id)}} -= 1
     {# 1st time Mentor hits fallback, do CLARIFICATION #}
     if ({{util.var_name("gbl_fallback_count", module_id)}} == 2){
-        # Flush output to check if we have an output with CLARIFICATION
+        {# Flush output to check if we have an output with CLARIFICATION #}
         ^flushoutput()
         $_response = %response
         ^reuse(CLARIFICATION)
-        # if reprompt signal does not match rule in local context, must produce some output
+        {# if reprompt signal does not match rule in local context, must produce some output #}
         if($_response == %response)
         {
-            # If there's nothing written in CLARIFICATION, use text in NO_UNDERSTAND
+            {# If there's nothing written in CLARIFICATION, use text in NO_UNDERSTAND #}
             {{util.markup_text(no_understand_markup, no_understand_text)}}
         }
     }
