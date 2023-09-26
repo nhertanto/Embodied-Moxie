@@ -2,7 +2,7 @@
 # README:
 # The is the base code for all the "show" nodes that we created for Moxie. All show
 #    nodes should listen to Yes/No/IDK, along with have a specific interaction
-#    when they timed out (aka the child didn't do or say anything for 20 seconds).
+#    when they timed out (aka the child didnt do or say anything for 20 seconds).
 #    The show nodes include: Show Drawing, Show Face, and Show Code.
 # NOTE:
 #    This jinja file extends from the PolarQuestion.jinja
@@ -34,7 +34,7 @@ u: SUCCESS ({% block success_pattern %} {% endblock success_pattern %})
 {# Moxie timed out if the Mentor didn't say anything or show something #}
 u: TIMED_OUT (eb-wait-complete) ^keep() ^repeat()
 	{% block timed_out %}
-	# Reprompt after 1st time Moxie timed out
+	{# Reprompt after 1st time Moxie timed out #}
 	if({{util.var_name("timedOutCount", module_id)}} <= 0){
 		^reuse(REPROMPT)
 		{{util.var_name("timedOutCount", module_id)}} += 1
@@ -43,7 +43,7 @@ u: TIMED_OUT (eb-wait-complete) ^keep() ^repeat()
 		^enableLongTimer()
 	}
 	else {
-		# turn of recognizer and set as timed out
+		{# turn of recognizer and set as timed out #}
 		{% block timed_out_exit %}
 		{% block timed_out_exit_code %} {# Insert additional code here #}
 		{% endblock timed_out_exit_code %}
