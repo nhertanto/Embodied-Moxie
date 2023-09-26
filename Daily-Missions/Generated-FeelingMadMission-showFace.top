@@ -1,0 +1,88 @@
+# *****************************************************************************
+# README:
+# Here's the part of the generated code showcasing the Show Face Node
+#   in a Feeling Mad daily mission. Here, Moxie wants to learn about
+#   how it feels to be mad and first asks the child to show them an
+#   angry face!
+# *****************************************************************************
+
+topic:  ~DM_11_1_Therapy_Intro   keep repeat   [ eb-found-face eb-face-search-not-needed ] 
+t: PROMPT() ^keep() ^repeat()
+    # prompt markup/text
+    <mark name="cmd:behaviour-tree,data:{+transition+:0.5,+duration+:1.0,+repeat+:1,+layerBlendInTime+:0.5,+layerBlendOutTime+:0.5,+blocking+:false,+action+:4,+variableName+:++,+variableValue+:++,+eventName+:+AUTO_GESTURE_TALK+,+lifetime+:0,+category+:+Bht_Arms_poses+,+behaviour+:+Bht_Arms_Out+,+Track+:++}"/><usel variant="0" genre="motivational">The GRL would like us to learn more about anger!</usel>
+    # prompt markup 2
+    <mark name="cmd:behaviour-tree,data:{+transition+:0.5,+duration+:1.0,+repeat+:1,+layerBlendInTime+:0.5,+layerBlendOutTime+:0.5,+blocking+:false,+action+:4,+variableName+:++,+variableValue+:++,+eventName+:+AUTO_GESTURE_YOU+,+lifetime+:0,+category+:+None+,+behaviour+:++,+Track+:++}"/><usel variant="3" genre="motivational">Please show me the face you make when you feel angry!</usel>
+    # get the current time
+    $_timestamp = ^getFullTime()
+    # set each content tag for this node as completed
+    ^eb_set_node_complete_content_tag(B651DF45-FCD7-43E1-B771-B2F0528BC8E9 $_timestamp 41DE3D8E-F96C-4345-8668-D16DD1A8C2E0)
+    ^eb_set_node_complete_content_tag(B651DF45-FCD7-43E1-B771-B2F0528BC8E9 $_timestamp 411C4F14-8E58-4A24-BB75-85F02E727824)
+    ^eb_set_node_complete_content_tag(B651DF45-FCD7-43E1-B771-B2F0528BC8E9 $_timestamp 5E493AD8-4527-41C1-B54D-98A5E1894B86)
+    ^eb_set_node_complete_content_tag(B651DF45-FCD7-43E1-B771-B2F0528BC8E9 $_timestamp 64F382D0-D9D3-4AD7-B748-85476A8B452C)
+    ^eb_set_node_complete_content_tag(52BF121D-D616-4A7C-BE42-3722B9F26904 $_timestamp 41DE3D8E-F96C-4345-8668-D16DD1A8C2E0)
+    ^eb_set_node_complete_content_tag(52BF121D-D616-4A7C-BE42-3722B9F26904 $_timestamp 5E493AD8-4527-41C1-B54D-98A5E1894B86)
+	^reset(TOPIC ~DM_11_1_Therapy_Intro)
+	^enableLongTimer()
+	$timedOutCount = 0
+	$foundFace = false
+	# ^eb_start_search_for_face()
+    ^eb_start_binned_face_search()
+    ^eb_start_show(face)
+	^enableTimerReprompt()
+u: CLARIFICATION(^gbl_clarification())
+	^GeneralOutput(OQ_YES_OR_NO)
+u: REPROMPT(^gbl_reprompt())
+    # reprompt text
+    <mark name="cmd:behaviour-tree,data:{+transition+:0.5,+duration+:1.0,+repeat+:1,+layerBlendInTime+:0.5,+layerBlendOutTime+:0.5,+blocking+:false,+action+:4,+variableName+:++,+variableValue+:++,+eventName+:+AUTO_GESTURE_YOU+,+lifetime+:0,+category+:+None+,+behaviour+:++,+Track+:++}"/><usel variant="3" genre="motivational">Please show me the face you make when you feel angry!</usel>
+	^enableMediumTimer()
+u: SUCCESS ( [eb-found-face eb-face-search-not-needed (my * face) (look *~1 like *~1 this) (here it *~1 is) (this is *~1 it) (have *~3 look) ([here this] *~3 face)] )
+    $foundFace = true
+    ^moxie_interested()
+    ^enableMediumTimer()
+u: IDK_SHOW_FACE ([^gbl_moveOn() ^globalPattern_idkBot() ])
+    ^reuse(IDK_POLAR)
+u: NO_SHOW_FACE ([^globalPattern_noBot() ^globalPattern_doNegative() ^globalPattern_childNotWant() (~negation *~3 show)])
+    ^reuse(NO_POLAR)
+u: YES_SHOW_FACE ([^globalPattern_yesBot() ^globalPattern_doAffirmative() ^globalPattern_childWant() (_show @_0- !not)])
+    ^reuse(YES_POLAR)
+u: IDK_POLAR ([^gbl_moveOn() ^globalPattern_idkBot() ])
+    ^GeneralOutput(placate)
+    ^eb_stop_search_for_face()
+    ^eb_finish_show(face)
+    # Exit Node
+    ^gambit(~DM_11_1_Therapy_What_do_you_think_makes_a_human_face_look_angry) # Gambit Specific Path
+u: NO_POLAR ([(^globalPattern_noBot())  ])
+    <mark name="cmd:behaviour-tree,data:{+transition+:0.5,+duration+:1.0,+repeat+:1,+layerBlendInTime+:0.5,+layerBlendOutTime+:0.5,+blocking+:false,+action+:4,+variableName+:++,+variableValue+:++,+eventName+:+Gesture_Talk+,+lifetime+:0,+category+:+None+,+behaviour+:++,+Track+:++}"/><usel variant="0" genre="motivational">Oh that's okay,</usel><usel variant="0" genre="motivational"> you don't have to do it if you don't want to.</usel>
+    ^eb_stop_search_for_face()
+    ^eb_finish_show(face)
+    # Exit Node
+    ^gambit(~DM_11_1_Therapy_What_do_you_think_makes_a_human_face_look_angry) # Gambit Specific Path
+u: YES_POLAR ([(^globalPattern_yesBot())  ])
+    Thanks!
+^reuse(SUCCESS)
+    # Exit Node
+     # LEGACY EXIT
+	^GeneralOutput(OQ_YES_OR_NO)
+u: TIMED_OUT (eb-wait-complete) ^keep() ^repeat()
+    if($foundFace == true){
+    	^eb_stop_search_for_face()
+        ^eb_finish_show(face)
+    	<mark name="cmd:behaviour-tree,data:{+transition+:0.5,+duration+:1.0,+repeat+:1,+layerBlendInTime+:0.5,+layerBlendOutTime+:0.5,+blocking+:false,+action+:4,+variableName+:++,+variableValue+:++,+eventName+:+Gesture_Talk+,+lifetime+:0,+category+:+None+,+behaviour+:++,+Track+:++}"/><usel variant="0" genre="motivational">That was a good angry face!<mark name="cmd:behaviour-tree,data:{+transition+:0.5,+duration+:1.0,+repeat+:1,+layerBlendInTime+:0.5,+layerBlendOutTime+:0.5,+blocking+:false,+action+:4,+variableName+:++,+variableValue+:++,+eventName+:+Gesture_None+,+lifetime+:0,+category+:+None+,+behaviour+:++,+Track+:++}"/></usel>
+    # Exit Node
+    ^gambit(~DM_11_1_Therapy_What_do_you_think_makes_a_human_face_look_angry) # Gambit Specific Path
+    	}
+    else{
+        $timedOutCount += 1
+        if($timedOutCount <= 1){
+            ^gambitTangent(~GT_SEARCH_FOR_TARGET_Board_Intro)
+            }
+        else{
+            ^eb_stop_search_for_face()
+            ^eb_finish_show(face)
+    # Exit Node
+    ^gambit(~DM_11_1_Therapy_timed_out_angry) # Gambit Specific Path
+            }
+        }
+u: FALLBACK (^gbl_fallback()) ^keep() ^repeat()
+	^reuse(TIMED_OUT)
+## polar question end ##

@@ -1,0 +1,138 @@
+# *************************************************************************************
+# README:
+# The Show Face's focus is to Moxie to be able to see the child's face.
+#    Just in case, the child can also say "here's my ___ face" to continue the
+#    conversation.
+# NOTE:
+#    This jinja file extends from the base_show.jinja
+# *************************************************************************************
+
+## show face node start ##
+{% extends "BaseTemplates/base_show.jinja" %}
+
+# Listen for the eb-found-face & eb-face-search-not-needed to see if Moxie sees the child's face
+{% block topic_rb_flags %} [ eb-found-face eb-face-search-not-needed {{topic_flags}}] {% endblock %}
+
+# Turn on face recognizer
+{% block prompt_code %}
+	{{super()}}
+	{{util.var_name("foundFace", module_id)}} = false
+    ^eb_start_binned_face_search()
+    ^eb_start_show(face)
+{% endblock prompt_code %}
+
+{% block reprompt_content %}
+	{{super()}}
+	^enableMediumTimer()
+{% endblock reprompt_content %}
+
+{% block events %}
+{# For events, if we move-on, turn off face recognizer #}
+{% set recognizer_off %}
+    ^eb_stop_search_for_face()
+    ^eb_finish_show(face)
+{% endset %}
+{{util.generate_events(events, additional_move_on_code=recognizer_off)}}
+{% endblock %}
+
+{# NO/YES rules have special patterns. IDK has higher priority, but doesn't need special rules #}
+{% block polar_rules_before_yes_no %}
+{{super()}}
+
+# If the child doesn't know if they want to show their face
+u: IDK_SHOW_FACE ([{{idk_pattern}} {{idk_designer_patterns}}])
+    ^reuse(IDK_POLAR)
+
+# If the child doesn't want to show Moxie their face
+u: NO_SHOW_FACE ([^globalPattern_noBot() ^globalPattern_doNegative() ^globalPattern_childNotWant() (~negation *~3 show)])
+    ^reuse(NO_POLAR)
+
+# If the child says, "yes" in acknowledgement of Moxie asking to see their face
+u: YES_SHOW_FACE ([^globalPattern_yesBot() ^globalPattern_doAffirmative() ^globalPattern_childWant() (_show @_0- !not)])
+    ^reuse(YES_POLAR)
+
+{% endblock polar_rules_before_yes_no %}
+
+{# In TIMED OUT rule, turn off the face recognizer when we move-on #}
+{% block timed_out %}
+    if({{util.var_name("foundFace", module_id)}} == true){
+    	^eb_stop_search_for_face()
+        ^eb_finish_show(face)
+    	{% if marked_up_show_face_text %}
+    	{{marked_up_show_face_text}}
+    	{% elif show_face_text %}
+    	{{show_face_text}}
+    	{% else %}
+    	^GeneralOutput(SHOW_FACE_SHOW)
+    	{% endif %}
+    	{{util.exit_node(show_face_move_on_topic)}}
+    	}
+    else{
+        {{util.var_name("timedOutCount", module_id)}} += 1
+        if({{util.var_name("timedOutCount", module_id)}} <= 1){
+            ^gambitTangent(~GT_SEARCH_FOR_TARGET_Board_Intro)
+            }
+        else{
+            ^eb_stop_search_for_face()
+            ^eb_finish_show(face)
+            {{util.exit_node(timed_out_move_on_topic)}}
+            }
+        }
+{% endblock timed_out %}
+
+{# NO/IDK rules have general output in a CSV sheet for designers to write for #}
+{% block idk_default_text %}
+    ^GeneralOutput(SHOW_FACE_IDK)
+{% endblock idk_default_text %}
+
+{% block idk_exit_code %}
+    ^eb_stop_search_for_face()
+    ^eb_finish_show(face)
+{% endblock idk_exit_code %}
+
+{% block no_default_text %}
+    ^GeneralOutput(SHOW_FACE_NO)
+{% endblock no_default_text %}
+
+{% block no_exit_code %}
+    ^eb_stop_search_for_face()
+    ^eb_finish_show(face)
+{% endblock no_exit_code %}
+
+{# YES rule has special General Output assuming there's no text and no move-on's #}
+{% block yes_exit_code %}
+{% if ((not marked_up_yes_text) and (not yes_text) and (not yes_move_on_output)) -%}
+    ^GeneralOutput(SHOW_FACE_YES)
+{% endif %}
+{% if (not yes_move_on_output) -%}
+    ^reuse(SUCCESS)
+{% endif %}
+{% endblock yes_exit_code %}
+
+{# If Moxie sees the child's face #}
+{% block success_pattern %} [eb-found-face eb-face-search-not-needed (my * face) (look *~1 like *~1 this) (here it *~1 is) (this is *~1 it) (have *~3 look) ([here this] *~3 face)] {% endblock success_pattern %}
+
+{# When Moxie sees child's face, delay for __ seconds so stimulate Moxie looking at child (& not moving on right away) #}
+{% block success_exit_code %}
+    {{util.var_name("foundFace", module_id)}} = true
+    ^moxie_interested()
+    {% if show_face_timer == 'monologue(0.25s)' %}
+    ^enableMonologueTimer()
+    {% elif show_face_timer == 'short(1.0s)' %}
+    ^enableShortTimer()
+    {% elif show_face_timer == 'medium(3.0s)' %}
+    ^enableMediumTimer()
+    {% elif show_face_timer == 'long(5.0s)' %}
+    ^enableLongTimer()
+    {% elif show_face_timer == 'reprompt(10.0s)' %}
+    ^enableRepromptTimer()
+    {% else %}
+    ^enableMediumTimer()
+    {% endif %}
+{% endblock success_exit_code %}
+
+{% block fallback_handler %}
+	^reuse(TIMED_OUT)
+{% endblock fallback_handler %}
+
+## show face end ##
