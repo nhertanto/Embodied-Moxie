@@ -10,10 +10,10 @@
 ## show face node start ##
 {% extends "BaseTemplates/base_show.jinja" %}
 
-# Listen for the eb-found-face & eb-face-search-not-needed to see if Moxie sees the child's face
+{# Listen for the eb-found-face & eb-face-search-not-needed to see if Moxie sees the child's face #}
 {% block topic_rb_flags %} [ eb-found-face eb-face-search-not-needed {{topic_flags}}] {% endblock %}
 
-# Turn on face recognizer
+{# Turn on face recognizer #}
 {% block prompt_code %}
 	{{super()}}
 	{{util.var_name("foundFace", module_id)}} = false
@@ -39,15 +39,15 @@
 {% block polar_rules_before_yes_no %}
 {{super()}}
 
-# If the child doesn't know if they want to show their face
+{# If the child doesn't know if they want to show their face #}
 u: IDK_SHOW_FACE ([{{idk_pattern}} {{idk_designer_patterns}}])
     ^reuse(IDK_POLAR)
 
-# If the child doesn't want to show Moxie their face
+{# If the child doesn't want to show Moxie their face #}
 u: NO_SHOW_FACE ([^globalPattern_noBot() ^globalPattern_doNegative() ^globalPattern_childNotWant() (~negation *~3 show)])
     ^reuse(NO_POLAR)
 
-# If the child says, "yes" in acknowledgement of Moxie asking to see their face
+{# If the child says, "yes" in acknowledgement of Moxie asking to see their face #}
 u: YES_SHOW_FACE ([^globalPattern_yesBot() ^globalPattern_doAffirmative() ^globalPattern_childWant() (_show @_0- !not)])
     ^reuse(YES_POLAR)
 
