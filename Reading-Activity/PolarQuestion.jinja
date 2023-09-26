@@ -41,6 +41,7 @@ u: CANT_DO_THAT([ {{cant_do_that_pattern}} {{cant_do_that_designer_patterns}} ])
 	{{cant_do_that_text}}
 	{% endif %}
 
+	{# Niken - Added these blocks here for Book Recognizer & other future nodes #}
 	{% block cant_exit_code %} {# insert additional code here #}
 	{% endblock cant_exit_code %}
 	{# optional routing for can't do that #}
@@ -66,6 +67,7 @@ u: IDK_POLAR ([{{idk_pattern}} {{idk_designer_patterns}}])
 	{{ util.complete_sel_tags(idk_sel_tags) }}
 	{% endblock idk_sel_tags %}
 
+	{# Niken - Added these blocks here for Book Recognizer & other future nodes #}
 	{% block idk_exit_code %} {# insert additional code here #}
 	{% endblock idk_exit_code %}
 	{# exit node #}
@@ -88,6 +90,7 @@ u: NO_POLAR ([{{no_pattern}} {{no_generated_pattern}} {{no_designer_patterns}}])
 	{{ util.complete_sel_tags(no_sel_tags) }}
 	{% endblock no_sel_tags %}
 
+	{# Niken - Added these blocks here for Book Recognizer & other future nodes #}
 	{% block no_exit_code %} {# insert additional code here #}
 	{% endblock no_exit_code %}
 	{# exit node #}
@@ -109,6 +112,7 @@ u: YES_POLAR ([{{yes_pattern}} {{yes_generated_pattern}} {{yes_designer_patterns
 	{{ util.complete_sel_tags(yes_sel_tags) }}
 	{% endblock yes_sel_tags %}
 
+	{# Niken - Added these blocks here for Book Recognizer & other future nodes #}
 	{% block yes_exit_code %} {# insert additional code here #}
 	{% endblock yes_exit_code %}
 	{# exit node #}
