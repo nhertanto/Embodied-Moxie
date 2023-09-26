@@ -1,0 +1,151 @@
+# ****************************************************************************************
+# README:
+# As a game designer, I wrote several whimsical whacky questions, along with the 
+#   potential responses Moxie could say. Since these questions could be asked
+#   frequently, I needed to make sure I accounted for everything a child could say!
+#   For example, here, we are asking, "Would you rather have a dragon or an electric
+#   sheep?" here's some of the phrases I accounted for:
+#   - In NOT_A_SELECTION : "That one," or "this animal" --> if the child pointed at an icon
+#   - BOTH : "I want a sheep and a dragon," "either one," or "both"
+#   - NEITHER : "I don't like either of them," "they're fake," or "that's dangerous!"
+#   - FIRST_CHOICE : "I want a dragon," "I like the lizard", "I don't like sheep"
+#   - SECOND_CHOICE : "sheep," "the first one," "not the dragon," or "the electric one"
+#   - IDK : "I don't know" or "I'm not sure"
+#   ... and each of the above possible phrases have its own responses!
+# *****************************************************************************************
+
+u: NOT_A_SELECTION (!~negation !first !second !third [this that] *~1 [one icon choice activity animal power])
+    # Do you mean the first one, or the second one?
+    ^GeneralOutput(FORCEDCHOICE_MEMORY_FIRST_OR_SECOND_ICON)
+u: BOTH(
+    [
+        (![~not ~dislike dangerous real fake imaginary (^globalPattern_ForcedChoiceNegation())] [ both (<< [dragon lizard fire] [electric sheep] >>)])
+        (!not !(^globalPattern_doNegative()) !(^globalPattern_ForcedChoiceNegation()) !(^globalPattern_childNotWant()) {[~select ~like ~want]} [both all each either everything])
+    ]
+)
+    $_comparator = $T_ENROLLCONVOJSON.choice_memory
+    if ($ENROLLCONVOJSON.$_comparator and $ENROLLCONVOJSON.$_comparator == both)
+    {
+            <usel variant="2" genre="motivational">Yeah! Having both a dragon and an electic sheep would be amazing!<mark name="cmd:icons-v2,data:{+command+:2,+index+:0,+transition+:0,+volume+:1.0,+icon0+:{+iconType+:0,+value+:+Null+,+background+:+Null+},+icon1+:{+iconType+:0,+value+:+Null+,+background+:+Null+},+icon2+:{+iconType+:0,+value+:+Null+,+background+:+Null+},+icon3+:{+iconType+:0,+value+:+Null+,+background+:+Null+},+highlight+:0}"/></usel>
+    # Exit Node
+    ^gambit(~ENROLLCONVO_Start_Enroll_buffer_RANDOM_INTRO) # Gambit Specific Path
+    }
+    else if ($ENROLLCONVOJSON.$_comparator and $ENROLLCONVOJSON.$_comparator != both)
+    {
+        $ENROLLCONVOJSON.$_comparator = both
+    <usel variant="0" genre="motivational">Yeah!</usel><usel variant="0" genre="none">I think it would be really fun to have a dragon and an electric sheep.<mark name="cmd:icons-v2,data:{+command+:2,+index+:0,+transition+:0,+volume+:1.0,+icon0+:{+iconType+:0,+value+:+Null+,+background+:+Null+},+icon1+:{+iconType+:0,+value+:+Null+,+background+:+Null+},+icon2+:{+iconType+:0,+value+:+Null+,+background+:+Null+},+icon3+:{+iconType+:0,+value+:+Null+,+background+:+Null+},+highlight+:0}"/></usel>
+    # Exit Node
+    ^gambit(~ENROLLCONVO_Start_Enroll_buffer_RANDOM_INTRO) # Gambit Specific Path
+    }
+    else
+    {
+        $ENROLLCONVOJSON.$_comparator = both
+    <usel variant="0" genre="motivational">Yeah!</usel><usel variant="0" genre="none">I think it would be really fun to have a dragon and an electric sheep.<mark name="cmd:icons-v2,data:{+command+:2,+index+:0,+transition+:0,+volume+:1.0,+icon0+:{+iconType+:0,+value+:+Null+,+background+:+Null+},+icon1+:{+iconType+:0,+value+:+Null+,+background+:+Null+},+icon2+:{+iconType+:0,+value+:+Null+,+background+:+Null+},+icon3+:{+iconType+:0,+value+:+Null+,+background+:+Null+},+highlight+:0}"/></usel>
+    # Exit Node
+    ^gambit(~ENROLLCONVO_Start_Enroll_buffer_RANDOM_INTRO) # Gambit Specific Path
+    }
+u: NEITHER(
+    [
+        ([~not ~dislike dangerous real fake imaginary (^globalPattern_ForcedChoiceNegation())])
+        ([([^globalPattern_childNotWant() not] *~3 [any anything both everything either all]) (!not !(^globalPattern_doNegative()) !(^globalPattern_childNotWant()) {[~select ~like ~want]} [none nothing neither]) (me [neither either])])
+        (^globalPattern_ForcedChoiceNegation())
+    ]
+)
+    $_comparator = $T_ENROLLCONVOJSON.choice_memory
+    if ($ENROLLCONVOJSON.$_comparator and $ENROLLCONVOJSON.$_comparator == neither)
+    {
+            <usel variant="2" genre="motivational">It's okay if you don't want either of them today!<mark name="cmd:icons-v2,data:{+command+:2,+index+:0,+transition+:0,+volume+:1.0,+icon0+:{+iconType+:0,+value+:+Null+,+background+:+Null+},+icon1+:{+iconType+:0,+value+:+Null+,+background+:+Null+},+icon2+:{+iconType+:0,+value+:+Null+,+background+:+Null+},+icon3+:{+iconType+:0,+value+:+Null+,+background+:+Null+},+highlight+:0}"/></usel>
+    # Exit Node
+    ^gambit(~ENROLLCONVO_Start_Enroll_buffer_RANDOM_INTRO) # Gambit Specific Path
+    }
+    else if ($ENROLLCONVOJSON.$_comparator and $ENROLLCONVOJSON.$_comparator != neither)
+    {
+        $ENROLLCONVOJSON.$_comparator = neither
+    <usel variant="0" genre="motivational">Oh! That's okay!</usel><usel variant="0" genre="none">Not everyone wants a dragon, or an electric sheep. <mark name="cmd:icons-v2,data:{+command+:2,+index+:0,+transition+:0,+volume+:1.0,+icon0+:{+iconType+:0,+value+:+Null+,+background+:+Null+},+icon1+:{+iconType+:0,+value+:+Null+,+background+:+Null+},+icon2+:{+iconType+:0,+value+:+Null+,+background+:+Null+},+icon3+:{+iconType+:0,+value+:+Null+,+background+:+Null+},+highlight+:0}"/></usel>
+    # Exit Node
+    ^gambit(~ENROLLCONVO_Start_Enroll_buffer_RANDOM_INTRO) # Gambit Specific Path
+    }
+    else
+    {
+        $ENROLLCONVOJSON.$_comparator = neither
+    <usel variant="0" genre="motivational">Oh! That's okay!</usel><usel variant="0" genre="none">Not everyone wants a dragon, or an electric sheep. <mark name="cmd:icons-v2,data:{+command+:2,+index+:0,+transition+:0,+volume+:1.0,+icon0+:{+iconType+:0,+value+:+Null+,+background+:+Null+},+icon1+:{+iconType+:0,+value+:+Null+,+background+:+Null+},+icon2+:{+iconType+:0,+value+:+Null+,+background+:+Null+},+icon3+:{+iconType+:0,+value+:+Null+,+background+:+Null+},+highlight+:0}"/></usel>
+    # Exit Node
+    ^gambit(~ENROLLCONVO_Start_Enroll_buffer_RANDOM_INTRO) # Gambit Specific Path
+    }
+u: FIRST_CHOICE(
+    !last
+    [
+        ([(![~not ~dislike dangerous real fake imaginary hide (^globalPattern_ForcedChoiceNegation())] [dragon lizard fire]) (~not *~5 [electric sheep])])
+        (<< {~botName} ({let} !not !second !third !(^globalPattern_doNegative()) !(^globalPattern_ForcedChoiceNegation()) !(^globalPattern_childNotWant()) {[~select ~like ~want]} *~4 first {[choice thing pick one]}) >>)
+    ]
+)
+    $_comparator = $T_ENROLLCONVOJSON.choice_memory
+    if ($ENROLLCONVOJSON.$_comparator and $ENROLLCONVOJSON.$_comparator == first)
+    {
+            <mark name="cmd:icons-v2,data:{+command+:4,+index+:1,+transition+:0,+volume+:1.0,+icon0+:{+iconType+:0,+value+:+Null+,+background+:+Null+},+icon1+:{+iconType+:0,+value+:+Null+,+background+:+Null+},+icon2+:{+iconType+:0,+value+:+Null+,+background+:+Null+},+icon3+:{+iconType+:0,+value+:+Null+,+background+:+Null+},+highlight+:0}"/><usel variant="0" genre="motivational">Ooo!</usel><usel variant="1" genre="motivational">Dragons are just the coolest after all!<mark name="cmd:icons-v2,data:{+command+:2,+index+:0,+transition+:0,+volume+:1.0,+icon0+:{+iconType+:0,+value+:+Null+,+background+:+Null+},+icon1+:{+iconType+:0,+value+:+Null+,+background+:+Null+},+icon2+:{+iconType+:0,+value+:+Null+,+background+:+Null+},+icon3+:{+iconType+:0,+value+:+Null+,+background+:+Null+},+highlight+:0}"/></usel>
+    # Exit Node
+    ^gambit(~ENROLLCONVO_Start_Enroll_buffer_RANDOM_INTRO) # Gambit Specific Path
+    }
+    else if ($ENROLLCONVOJSON.$_comparator and $ENROLLCONVOJSON.$_comparator != first)
+    {
+        $ENROLLCONVOJSON.$_comparator = first
+    <mark name="cmd:icons-v2,data:{+command+:4,+index+:1,+transition+:0,+volume+:1.0,+icon0+:{+iconType+:0,+value+:+Null+,+background+:+Null+},+icon1+:{+iconType+:0,+value+:+Null+,+background+:+Null+},+icon2+:{+iconType+:0,+value+:+Null+,+background+:+Null+},+icon3+:{+iconType+:0,+value+:+Null+,+background+:+Null+},+highlight+:0}"/><usel variant="0" genre="motivational">Ooo!</usel><usel variant="1" genre="motivational"> You could fly high above the clouds, on the back of your new dragon friend.<mark name="cmd:icons-v2,data:{+command+:2,+index+:0,+transition+:0,+volume+:1.0,+icon0+:{+iconType+:0,+value+:+Null+,+background+:+Null+},+icon1+:{+iconType+:0,+value+:+Null+,+background+:+Null+},+icon2+:{+iconType+:0,+value+:+Null+,+background+:+Null+},+icon3+:{+iconType+:0,+value+:+Null+,+background+:+Null+},+highlight+:0}"/></usel>
+    # Exit Node
+    ^gambit(~ENROLLCONVO_Start_Enroll_buffer_RANDOM_INTRO) # Gambit Specific Path
+    }
+    else
+    {
+        $ENROLLCONVOJSON.$_comparator = first
+    <mark name="cmd:icons-v2,data:{+command+:4,+index+:1,+transition+:0,+volume+:1.0,+icon0+:{+iconType+:0,+value+:+Null+,+background+:+Null+},+icon1+:{+iconType+:0,+value+:+Null+,+background+:+Null+},+icon2+:{+iconType+:0,+value+:+Null+,+background+:+Null+},+icon3+:{+iconType+:0,+value+:+Null+,+background+:+Null+},+highlight+:0}"/><usel variant="0" genre="motivational">Ooo!</usel><usel variant="1" genre="motivational"> You could fly high above the clouds, on the back of your new dragon friend.<mark name="cmd:icons-v2,data:{+command+:2,+index+:0,+transition+:0,+volume+:1.0,+icon0+:{+iconType+:0,+value+:+Null+,+background+:+Null+},+icon1+:{+iconType+:0,+value+:+Null+,+background+:+Null+},+icon2+:{+iconType+:0,+value+:+Null+,+background+:+Null+},+icon3+:{+iconType+:0,+value+:+Null+,+background+:+Null+},+highlight+:0}"/></usel>
+    # Exit Node
+    ^gambit(~ENROLLCONVO_Start_Enroll_buffer_RANDOM_INTRO) # Gambit Specific Path
+    }
+u: SECOND_CHOICE(
+    [
+        ([(![~not ~dislike dangerous real fake imaginary shock (^globalPattern_ForcedChoiceNegation())] [electric sheep]) (~not *~5 [dragon lizard fire])])
+        (<< {~botName} ({let} !not !first !third !(^globalPattern_doNegative()) !(^globalPattern_ForcedChoiceNegation()) !(^globalPattern_childNotWant()) {[~select ~like ~want]} *~4 second {[choice thing pick one]}) >>)
+    ]
+)
+    $_comparator = $T_ENROLLCONVOJSON.choice_memory
+    if ($ENROLLCONVOJSON.$_comparator and $ENROLLCONVOJSON.$_comparator == second)
+    {        
+            <mark name="cmd:icons-v2,data:{+command+:4,+index+:0,+transition+:0,+volume+:1.0,+icon0+:{+iconType+:0,+value+:+Null+,+background+:+Null+},+icon1+:{+iconType+:0,+value+:+Null+,+background+:+Null+},+icon2+:{+iconType+:0,+value+:+Null+,+background+:+Null+},+icon3+:{+iconType+:0,+value+:+Null+,+background+:+Null+},+highlight+:0}"/><usel variant="0" genre="motivational">You sure like those fluffy, shocking cuddles!<mark name="cmd:icons-v2,data:{+command+:2,+index+:0,+transition+:0,+volume+:1.0,+icon0+:{+iconType+:0,+value+:+Null+,+background+:+Null+},+icon1+:{+iconType+:0,+value+:+Null+,+background+:+Null+},+icon2+:{+iconType+:0,+value+:+Null+,+background+:+Null+},+icon3+:{+iconType+:0,+value+:+Null+,+background+:+Null+},+highlight+:0}"/></usel>
+    # Exit Node
+    ^gambit(~ENROLLCONVO_Start_Enroll_buffer_RANDOM_INTRO) # Gambit Specific Path
+    }
+    else if ($ENROLLCONVOJSON.$_comparator and $ENROLLCONVOJSON.$_comparator != second)
+    {
+        $ENROLLCONVOJSON.$_comparator = second
+    <mark name="cmd:icons-v2,data:{+command+:4,+index+:0,+transition+:0,+volume+:1.0,+icon0+:{+iconType+:0,+value+:+Null+,+background+:+Null+},+icon1+:{+iconType+:0,+value+:+Null+,+background+:+Null+},+icon2+:{+iconType+:0,+value+:+Null+,+background+:+Null+},+icon3+:{+iconType+:0,+value+:+Null+,+background+:+Null+},+highlight+:0}"/><usel variant="0" genre="motivational">Ooo!</usel><usel variant="0" genre="motivational">An electric sheep would give you so many fluffy, shocking cuddles!<mark name="cmd:icons-v2,data:{+command+:2,+index+:0,+transition+:0,+volume+:1.0,+icon0+:{+iconType+:0,+value+:+Null+,+background+:+Null+},+icon1+:{+iconType+:0,+value+:+Null+,+background+:+Null+},+icon2+:{+iconType+:0,+value+:+Null+,+background+:+Null+},+icon3+:{+iconType+:0,+value+:+Null+,+background+:+Null+},+highlight+:0}"/></usel>
+    # Exit Node
+    ^gambit(~ENROLLCONVO_Start_Enroll_buffer_RANDOM_INTRO) # Gambit Specific Path
+    }
+    else
+    {
+        $ENROLLCONVOJSON.$_comparator = second
+    <mark name="cmd:icons-v2,data:{+command+:4,+index+:0,+transition+:0,+volume+:1.0,+icon0+:{+iconType+:0,+value+:+Null+,+background+:+Null+},+icon1+:{+iconType+:0,+value+:+Null+,+background+:+Null+},+icon2+:{+iconType+:0,+value+:+Null+,+background+:+Null+},+icon3+:{+iconType+:0,+value+:+Null+,+background+:+Null+},+highlight+:0}"/><usel variant="0" genre="motivational">Ooo!</usel><usel variant="0" genre="motivational">An electric sheep would give you so many fluffy, shocking cuddles!<mark name="cmd:icons-v2,data:{+command+:2,+index+:0,+transition+:0,+volume+:1.0,+icon0+:{+iconType+:0,+value+:+Null+,+background+:+Null+},+icon1+:{+iconType+:0,+value+:+Null+,+background+:+Null+},+icon2+:{+iconType+:0,+value+:+Null+,+background+:+Null+},+icon3+:{+iconType+:0,+value+:+Null+,+background+:+Null+},+highlight+:0}"/></usel>
+    # Exit Node
+    ^gambit(~ENROLLCONVO_Start_Enroll_buffer_RANDOM_INTRO) # Gambit Specific Path
+    }
+u: IDK([ ^globalPattern_idkBot() signal-clarification])
+    $_comparator = $T_ENROLLCONVOJSON.choice_memory
+    if ($ENROLLCONVOJSON.$_comparator and $ENROLLCONVOJSON.$_comparator == idk)
+    {        
+            <usel variant="0" genre="motivational">It's okay if you can't choose today!<mark name="cmd:icons-v2,data:{+command+:2,+index+:0,+transition+:0,+volume+:1.0,+icon0+:{+iconType+:0,+value+:+Null+,+background+:+Null+},+icon1+:{+iconType+:0,+value+:+Null+,+background+:+Null+},+icon2+:{+iconType+:0,+value+:+Null+,+background+:+Null+},+icon3+:{+iconType+:0,+value+:+Null+,+background+:+Null+},+highlight+:0}"/></usel>
+    # Exit Node
+    ^gambit(~ENROLLCONVO_Start_Enroll_buffer_RANDOM_INTRO) # Gambit Specific Path
+    }
+    else if ($ENROLLCONVOJSON.$_comparator and $ENROLLCONVOJSON.$_comparator != idk)
+    {
+        $ENROLLCONVOJSON.$_comparator = idk
+    <usel variant="2" genre="motivational">It's okay!</usel><usel variant="2" genre="motivational"> Dragons and electric sheep aren't for everyone!</usel><mark name="cmd:icons-v2,data:{+command+:2,+index+:0,+transition+:0,+volume+:1.0,+icon0+:{+iconType+:0,+value+:+Null+,+background+:+Null+},+icon1+:{+iconType+:0,+value+:+Null+,+background+:+Null+},+icon2+:{+iconType+:0,+value+:+Null+,+background+:+Null+},+icon3+:{+iconType+:0,+value+:+Null+,+background+:+Null+},+highlight+:0}"/>
+    # Exit Node
+    ^gambit(~ENROLLCONVO_Start_Enroll_buffer_RANDOM_INTRO) # Gambit Specific Path
+    }
+    else
+    {
+        $ENROLLCONVOJSON.$_comparator = idk
+    <usel variant="2" genre="motivational">It's okay!</usel><usel variant="2" genre="motivational"> Dragons and electric sheep aren't for everyone!</usel><mark name="cmd:icons-v2,data:{+command+:2,+index+:0,+transition+:0,+volume+:1.0,+icon0+:{+iconType+:0,+value+:+Null+,+background+:+Null+},+icon1+:{+iconType+:0,+value+:+Null+,+background+:+Null+},+icon2+:{+iconType+:0,+value+:+Null+,+background+:+Null+},+icon3+:{+iconType+:0,+value+:+Null+,+background+:+Null+},+highlight+:0}"/>
+    # Exit Node
+    ^gambit(~ENROLLCONVO_Start_Enroll_buffer_RANDOM_INTRO) # Gambit Specific Path
+    }
