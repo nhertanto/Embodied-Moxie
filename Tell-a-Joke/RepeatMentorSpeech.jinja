@@ -1,0 +1,45 @@
+# *************************************************************************************
+# README:
+# The Repeat Mentor Speech's focus is to allow Moxie to repeat anything the child
+#    says! For example:
+#       Mentor: Knock knock
+#       Moxie : Who's there?
+#       Mentor: Boo
+#       Moxie : (Boo) who? <-- Moxie repeats "Boo"
+# NOTE:
+#    This jinja file extends from the base_topic.jinja
+# *************************************************************************************
+
+{% extends "BaseTemplates/base_topic.jinja" %}
+
+{% block prompt_content %}
+    {{super()}}
+    {{util.var_name("Mentor_speech", module_id)}} = null
+{% endblock prompt_content %}
+
+{% block body %}
+
+# Mentor says anything!
+u: SET_MENTOR_SPEECH (^gbl_fallback()) ^keep() ^repeat()
+    ^eb_set_output_type(BASE_CASE)
+    {{util.var_name("Mentor_speech", module_id)}} = ^eb_fallback_speech_input()
+    ^analyze({{util.var_name("Mentor_speech", module_id)}})
+    ^reuse(SAY_MENTOR_SPEECH)
+    
+u: SAY_MENTOR_SPEECH ($CONST_alwaysFalse=true)  ^keep() ^repeat() ^sequence()
+
+    # If the child says any bad words, remove that word from the phrase so that Moxie doesn't repeat it!
+    a: FILTER_BLACKLIST (_~blacklist) ^keep() ^repeat()
+        ^unmark(* _0)
+        {{util.var_name("Mentor_speech", module_id)}} = ^substitute(CHARACTER {{util.var_name("Mentor_speech", module_id)}} '_0 "")
+        ^retry(FILTER_BLACKLIST)
+
+    # Moxie repeats whatever the Mentor said!
+    a: MOXIE_REPEATS_MENTOR_SPEECH () ^keep() ^repeat() 
+        {{util.markup_text(Moxie_prepend_reply_markup, Moxie_prepend_reply_text)}}
+        {{util.var_name("Mentor_speech", module_id)}}
+        ^eb_set_output_type(CATCH_ALL)
+        {{util.exit_node(mentor_reply_move_on_topic)}}
+
+
+{% endblock body %}
