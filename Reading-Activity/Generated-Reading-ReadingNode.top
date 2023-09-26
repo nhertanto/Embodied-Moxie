@@ -1,0 +1,362 @@
+# *****************************************************************************
+# README:
+# Here's the part of the generated code showcasing the Reading Node
+#   Rules such as 'b: STT_PARTIAL_1' refer to the sound effects that Moxie
+#   would play depending on the STT Partial (pattern) the designer has listed
+#   in a CSV sheet. In this example, these are the STT Partials we are 
+#   searching for if the child reads "Click Clack Moo Cows that Type"
+# *****************************************************************************
+
+topic:  ~READ_Portal_Book_Reading_Intro_UNROLLED_CID_click_clack_moo_cows_that_type   keep repeat   [ noPolite noYoureWelcome ?eb-cat-nap handle-engagement-events ?eb-reprompt ] 
+t: PROMPT() ^keep() ^repeat()
+    $T_READJSON.engagement_event_first = 0 # For NEEDY USER rule
+    $T_READJSON.no_moxie_end_attempts = 3 # Mentor must say 'the end' without Moxie twice to exit
+    ^eb_accept_partials(true) # Turning on partials
+    ^eb_enable_prepend_moxie() # Turn on prepending Moxie's name - for "Moxie the end"
+    # Create a variable to keep track of each STT Partial rule that fires
+    $T_READJSON.keywordTracker_1 = null
+    $T_READJSON.keywordTracker_2 = null
+    $T_READJSON.keywordTracker_3 = null
+    $T_READJSON.keywordTracker_4 = null
+    $T_READJSON.keywordTracker_5 = null
+    $T_READJSON.keywordTracker_6 = null
+    $T_READJSON.keywordTracker_7 = null
+    $T_READJSON.keywordTracker_8 = null
+    $T_READJSON.keywordTracker_9 = null
+    $T_READJSON.keywordTracker_10 = null
+    $T_READJSON.keywordTracker_11 = null
+    $T_READJSON.keywordTracker_12 = null
+    $T_READJSON.keywordTracker_13 = null
+    $T_READJSON.keywordTracker_14 = null
+    $T_READJSON.keywordTracker_15 = null
+    $T_READJSON.keywordTracker_16 = null
+    $T_READJSON.keywordTracker_17 = null
+    $T_READJSON.keywordTracker_18 = null
+    $T_READJSON.keywordTracker_19 = null
+    $T_READJSON.keywordTracker_20 = null
+    $T_READJSON.keywordTracker_21 = null
+    $T_READJSON.keywordTracker_22 = null
+    $T_READJSON.keywordTracker_23 = null
+    $T_READJSON.keywordTracker_24 = null
+    $T_READJSON.keywordTracker_25 = null
+    $T_READJSON.keywordTracker_26 = null
+    $T_READJSON.keywordTracker_27 = null
+    $T_READJSON.keywordTracker_28 = null
+    $T_READJSON.keywordTracker_29 = null
+    $T_READJSON.keywordTracker_30 = null
+    $T_READJSON.keywordTracker_31 = null
+    $T_READJSON.keywordTracker_32 = null
+    $T_READJSON.keywordTracker_33 = null
+    $T_READJSON.keywordTracker_34 = null
+    # Init Active Listening
+    $T_READJSON.ActiveListenJSON = ^jsoncreate(permanent object)
+    # prevents the same rule from firing twice per input
+    $T_READJSON.ActiveListenJSON.partial_tracker = ^jsoncreate(permanent object)
+    # sfx and comment cool down timer
+    $T_READJSON.ActiveListenJSON.cool_down =  1 
+    # init last output match time
+    $T_READJSON.ActiveListenJSON.last_output = 0
+    # prompt markup/text
+    <mark name="cmd:behaviour-tree,data:{+transition+:0.5,+duration+:1.0,+repeat+:1,+layerBlendInTime+:0.5,+layerBlendOutTime+:0.5,+blocking+:false,+action+:4,+variableName+:++,+variableValue+:++,+eventName+:+Gesture_Talk+,+lifetime+:0,+category+:+None+,+behaviour+:++,+Track+:++}"/><usel variant="1" genre="none"><usel variant="0" genre="none">Read the words out loud,</usel><mark name="cmd:behaviour-tree,data:{+transition+:0.5,+duration+:1.0,+repeat+:1,+layerBlendInTime+:0.5,+layerBlendOutTime+:0.5,+blocking+:false,+action+:4,+variableName+:++,+variableValue+:++,+eventName+:+Gesture_Self+,+lifetime+:0,+category+:+None+,+behaviour+:++,+Track+:++}"/> or tell me about the pictures.<mark name="cmd:behaviour-tree,data:{+transition+:0.5,+duration+:1.0,+repeat+:1,+layerBlendInTime+:0.5,+layerBlendOutTime+:0.5,+blocking+:false,+action+:4,+variableName+:++,+variableValue+:++,+eventName+:+Gesture_None+,+lifetime+:0,+category+:+None+,+behaviour+:++,+Track+:++}"/></usel> <mark name="cmd:behaviour-tree,data:{+transition+:0.5,+duration+:1.0,+repeat+:1,+layerBlendInTime+:0.5,+layerBlendOutTime+:0.5,+blocking+:false,+action+:4,+variableName+:++,+variableValue+:++,+eventName+:+Gesture_Talk+,+lifetime+:0,+category+:+None+,+behaviour+:++,+Track+:++}"/><usel variant="1" genre="none">When you're done, say, Moxie, the end. <mark name="cmd:behaviour-tree,data:{+transition+:0.5,+duration+:1.0,+repeat+:1,+layerBlendInTime+:0.5,+layerBlendOutTime+:0.5,+blocking+:false,+action+:4,+variableName+:++,+variableValue+:++,+eventName+:+Gesture_None+,+lifetime+:0,+category+:+None+,+behaviour+:++,+Track+:++}"/></usel>
+    # prompt markup 2
+    <mark name="cmd:playaudio,data:{+SoundToPlay+:+moxie_mu_reading_farm_neutral_loop_v1+,+LoopSound+:true,+playInBackground+:true,+ReplaceCurrentSound+:false,+PlayImmediate+:true,+Volume+:0.5,+AudioTimelineField+:+none+}"/>
+u: CLARIFICATION(^gbl_clarification())
+    # no clarification output provided
+u: REPROMPT(^gbl_reprompt())
+    ^eb_accept_partials(true)
+    ^eb_block_cutoff()
+    ^eb_enable_prepend_moxie()
+    # reprompt text
+    <mark name="cmd:playaudio,data:{+SoundToPlay+:+moxie_mu_reading_farm_neutral_loop_v1+,+LoopSound+:true,+playInBackground+:true,+ReplaceCurrentSound+:false,+PlayImmediate+:true,+Volume+:0.5,+AudioTimelineField+:+none+}"/>
+u: END_ACTIVE_LISTENING(!$eb_state_speechfinal=false ([(!~not ^readingPattern_endBook()) (clickety clack quack) (clickity clack clack) (clickity clack quack) (clickety clack clack)]))
+    ^eb_accept_partials(false) # Turning off partials
+    ^eb_set_output_type(GLOBAL_COMMAND) # to exit despite Mentor not targeted/engaged
+    ^eb_disable_prepend_moxie() # Turn off prepending Moxie's name
+    $T_READJSON.ActiveListenJSON = null
+    # Exit Node
+    ^gambit(~READ_Portal_Book_Reading_stop_the_music_UNROLLED_CID_click_clack_moo_cows_that_type) # Gambit Specific Path
+u: EXIT_ACTIVE_LISTENING(!$eb_state_speechfinal=false ([(!~not ^readingPattern_endBook()) (clickety clack quack) (clickity clack clack) (clickity clack quack) (clickety clack clack)]))
+    ^eb_accept_partials(false) # Turning off partials
+    ^eb_set_output_type(GLOBAL_COMMAND) # to exit despite Mentor not targeted/engaged
+    ^eb_disable_prepend_moxie() # Turn off prepending Moxie's name
+    $T_READJSON.ActiveListenJSON = null
+    # Exit Node
+    ^gambit(~READ_Portal_Book_Reading_stop_the_music_UNROLLED_CID_click_clack_moo_cows_that_type) # Gambit Specific Path
+u: MATCH_INPUT( !$$signal )
+    $_response = %response
+    ^sequence()
+    if($_response < %response)
+    {
+        $T_READJSON.ActiveListenJSON.last_output = ^getFullTime()
+    }
+    a: STT_PARTIAL (^compareTime( $T_READJSON.ActiveListenJSON.cool_down $T_READJSON.ActiveListenJSON.last_output )=true) ^refine()
+        #$T_READJSON.no_moxie_end_attempts = 3
+        b: STT_PARTIAL_1 ($T_READJSON.keywordTracker_1!=true (believe))
+            $T_READJSON.no_moxie_end_attempts = 3
+            $T_READJSON.keywordTracker_1 = true
+            <mark name="cmd:stopaudio,data:{+scope+:1,+channel+:2,+FadeOutTime+:0.0}"/> # Turn off the stinger
+            ^eb_set_output_type(STINGER)
+        b: STT_PARTIAL_2 ($T_READJSON.keywordTracker_2!=true (click clack moo))
+            $T_READJSON.no_moxie_end_attempts = 3
+            $T_READJSON.keywordTracker_2 = true
+            <mark name="cmd:stopaudio,data:{+scope+:1,+channel+:2,+FadeOutTime+:0.0}"/> # Turn off the stinger
+            ^eb_set_output_type(STINGER)
+            <mark name="cmd:playaudio,data:{+SoundToPlay+:+sc_click_typewriter_lp_01+,+LoopSound+:false,+playInBackground+:false,+ReplaceCurrentSound+:false,+PlayImmediate+:true,+Volume+:1.0,+AudioTimelineField+:+none+}"/>
+        b: STT_PARTIAL_3 ($T_READJSON.keywordTracker_3!=true (click clack moo))
+            $T_READJSON.no_moxie_end_attempts = 3
+            $T_READJSON.keywordTracker_3 = true
+            <mark name="cmd:stopaudio,data:{+scope+:1,+channel+:2,+FadeOutTime+:0.0}"/> # Turn off the stinger
+            ^eb_set_output_type(STINGER)
+            <mark name="cmd:playaudio,data:{+SoundToPlay+:+sc_click_typewriter_lp_01+,+LoopSound+:false,+playInBackground+:false,+ReplaceCurrentSound+:false,+PlayImmediate+:true,+Volume+:1.0,+AudioTimelineField+:+none+}"/>
+        b: STT_PARTIAL_4 ($T_READJSON.keywordTracker_4!=true (click clack moo))
+            $T_READJSON.no_moxie_end_attempts = 3
+            $T_READJSON.keywordTracker_4 = true
+            <mark name="cmd:stopaudio,data:{+scope+:1,+channel+:2,+FadeOutTime+:0.0}"/> # Turn off the stinger
+            ^eb_set_output_type(STINGER)
+            <emphasis level="strong"><emphasis level="reduced">Typing</emphasis> cows!<mark name="cmd:vocal-gesture,data:{+gesture+:+laugh_giggle+}"/></emphasis>
+        b: STT_PARTIAL_5 ($T_READJSON.keywordTracker_5!=true (sincerely *~2 cow))
+            $T_READJSON.no_moxie_end_attempts = 3
+            $T_READJSON.keywordTracker_5 = true
+            <mark name="cmd:stopaudio,data:{+scope+:1,+channel+:2,+FadeOutTime+:0.0}"/> # Turn off the stinger
+            ^eb_set_output_type(STINGER)
+            <mark name="cmd:playaudio,data:{+SoundToPlay+:+moxie_mu_reading_farm_interlude_conundrum1_v1+,+LoopSound+:false,+playInBackground+:false,+channel+:2,+ReplaceCurrentSound+:false,+PlayImmediate+:true,+Volume+:1.0,+FadeInTime+:0.0,+FadeOutTime+:0.0,+AudioTimelineField+:+none+}"/>
+        b: STT_PARTIAL_6 ($T_READJSON.keywordTracker_6!=true (sincerely *~2 cow))
+            $T_READJSON.no_moxie_end_attempts = 3
+            $T_READJSON.keywordTracker_6 = true
+            <mark name="cmd:stopaudio,data:{+scope+:1,+channel+:2,+FadeOutTime+:0.0}"/> # Turn off the stinger
+            ^eb_set_output_type(STINGER)
+            <mark name="cmd:playaudio,data:{+SoundToPlay+:+moxie_mu_reading_farm_interlude_conundrum2_v1+,+LoopSound+:false,+playInBackground+:false,+channel+:2,+ReplaceCurrentSound+:false,+PlayImmediate+:true,+Volume+:1.0,+FadeInTime+:0.0,+FadeOutTime+:0.0,+AudioTimelineField+:+none+}"/>
+        b: STT_PARTIAL_7 ($T_READJSON.keywordTracker_7!=true (milk today))
+            $T_READJSON.no_moxie_end_attempts = 3
+            $T_READJSON.keywordTracker_7 = true
+            <mark name="cmd:stopaudio,data:{+scope+:1,+channel+:2,+FadeOutTime+:0.0}"/> # Turn off the stinger
+            ^eb_set_output_type(STINGER)
+            <emphasis level="strong"><emphasis level="reduced">Smart</emphasis> cows!</emphasis>
+        b: STT_PARTIAL_8 ($T_READJSON.keywordTracker_8!=true (milk *~1 today))
+            $T_READJSON.no_moxie_end_attempts = 3
+            $T_READJSON.keywordTracker_8 = true
+            <mark name="cmd:stopaudio,data:{+scope+:1,+channel+:2,+FadeOutTime+:0.0}"/> # Turn off the stinger
+            ^eb_set_output_type(STINGER)
+            <mark name="cmd:playaudio,data:{+SoundToPlay+:+sc_click_farmer_mildpissed_01+,+LoopSound+:false,+playInBackground+:false,+ReplaceCurrentSound+:false,+PlayImmediate+:true,+Volume+:1.0,+AudioTimelineField+:+none+}"/>
+        b: STT_PARTIAL_9 ($T_READJSON.keywordTracker_9!=true (milk *~1 today))
+            $T_READJSON.no_moxie_end_attempts = 3
+            $T_READJSON.keywordTracker_9 = true
+            <mark name="cmd:stopaudio,data:{+scope+:1,+channel+:2,+FadeOutTime+:0.0}"/> # Turn off the stinger
+            ^eb_set_output_type(STINGER)
+            <mark name="cmd:playaudio,data:{+SoundToPlay+:+sc_click_farmer_mildpissed_03+,+LoopSound+:false,+playInBackground+:false,+ReplaceCurrentSound+:false,+PlayImmediate+:true,+Volume+:1.0,+AudioTimelineField+:+none+}"/>
+        b: STT_PARTIAL_10 ($T_READJSON.keywordTracker_10!=true (milk *~1 today))
+            $T_READJSON.no_moxie_end_attempts = 3
+            $T_READJSON.keywordTracker_10 = true
+            <mark name="cmd:stopaudio,data:{+scope+:1,+channel+:2,+FadeOutTime+:0.0}"/> # Turn off the stinger
+            ^eb_set_output_type(STINGER)
+            <mark name="cmd:playaudio,data:{+SoundToPlay+:+sc_click_farmer_mildpissed_04+,+LoopSound+:false,+playInBackground+:false,+ReplaceCurrentSound+:false,+PlayImmediate+:true,+Volume+:1.0,+AudioTimelineField+:+none+}"/>
+        b: STT_PARTIAL_11 ($T_READJSON.keywordTracker_11!=true (cow *~3 busy *~2 work))
+            $T_READJSON.no_moxie_end_attempts = 3
+            $T_READJSON.keywordTracker_11 = true
+            <mark name="cmd:stopaudio,data:{+scope+:1,+channel+:2,+FadeOutTime+:0.0}"/> # Turn off the stinger
+            ^eb_set_output_type(STINGER)
+            <mark name="cmd:playaudio,data:{+SoundToPlay+:+sc_click_typewriter_lp_02+,+LoopSound+:false,+playInBackground+:false,+ReplaceCurrentSound+:false,+PlayImmediate+:true,+Volume+:1.0,+AudioTimelineField+:+none+}"/>
+        b: STT_PARTIAL_12 ($T_READJSON.keywordTracker_12!=true (next day))
+            $T_READJSON.no_moxie_end_attempts = 3
+            $T_READJSON.keywordTracker_12 = true
+            <mark name="cmd:stopaudio,data:{+scope+:1,+channel+:2,+FadeOutTime+:0.0}"/> # Turn off the stinger
+            ^eb_set_output_type(STINGER)
+        b: STT_PARTIAL_13 ($T_READJSON.keywordTracker_13!=true (!farm ~no *~1 milk *~3 ~no *~1 egg))
+            $T_READJSON.no_moxie_end_attempts = 3
+            $T_READJSON.keywordTracker_13 = true
+            <mark name="cmd:stopaudio,data:{+scope+:1,+channel+:2,+FadeOutTime+:0.0}"/> # Turn off the stinger
+            ^eb_set_output_type(STINGER)
+            <emphasis level="strong"><emphasis level="reduced">Tricky</emphasis> hens!</emphasis>
+        b: STT_PARTIAL_14 ($T_READJSON.keywordTracker_14!=true (hen *~3 cold))
+            $T_READJSON.no_moxie_end_attempts = 3
+            $T_READJSON.keywordTracker_14 = true
+            <mark name="cmd:stopaudio,data:{+scope+:1,+channel+:2,+FadeOutTime+:0.0}"/> # Turn off the stinger
+            ^eb_set_output_type(STINGER)
+            <mark name="cmd:playaudio,data:{+SoundToPlay+:+sc_click_chicken_cluck_01+,+LoopSound+:false,+playInBackground+:false,+ReplaceCurrentSound+:false,+PlayImmediate+:true,+Volume+:1.0,+AudioTimelineField+:+none+}"/>
+        b: STT_PARTIAL_15 ($T_READJSON.keywordTracker_15!=true (hen))
+            $T_READJSON.no_moxie_end_attempts = 3
+            $T_READJSON.keywordTracker_15 = true
+            <mark name="cmd:stopaudio,data:{+scope+:1,+channel+:2,+FadeOutTime+:0.0}"/> # Turn off the stinger
+            ^eb_set_output_type(STINGER)
+            <mark name="cmd:playaudio,data:{+SoundToPlay+:+sc_click_chicken_cluck_02+,+LoopSound+:false,+playInBackground+:false,+ReplaceCurrentSound+:false,+PlayImmediate+:true,+Volume+:1.0,+AudioTimelineField+:+none+}"/>
+        b: STT_PARTIAL_16 ($T_READJSON.keywordTracker_16!=true (egg))
+            $T_READJSON.no_moxie_end_attempts = 3
+            $T_READJSON.keywordTracker_16 = true
+            <mark name="cmd:stopaudio,data:{+scope+:1,+channel+:2,+FadeOutTime+:0.0}"/> # Turn off the stinger
+            ^eb_set_output_type(STINGER)
+            <mark name="cmd:playaudio,data:{+SoundToPlay+:+sc_click_farmer_mediumpissed_03+,+LoopSound+:false,+playInBackground+:false,+ReplaceCurrentSound+:false,+PlayImmediate+:true,+Volume+:1.0,+AudioTimelineField+:+none+}"/>
+        b: STT_PARTIAL_17 ($T_READJSON.keywordTracker_17!=true (furious))
+            $T_READJSON.no_moxie_end_attempts = 3
+            $T_READJSON.keywordTracker_17 = true
+            <mark name="cmd:stopaudio,data:{+scope+:1,+channel+:2,+FadeOutTime+:0.0}"/> # Turn off the stinger
+            ^eb_set_output_type(STINGER)
+            <mark name="cmd:playaudio,data:{+SoundToPlay+:+sc_click_farmer_superpissed_01+,+LoopSound+:false,+playInBackground+:false,+ReplaceCurrentSound+:false,+PlayImmediate+:true,+Volume+:1.0,+AudioTimelineField+:+none+}"/>
+        b: STT_PARTIAL_18 ($T_READJSON.keywordTracker_18!=true (furious))
+            $T_READJSON.no_moxie_end_attempts = 3
+            $T_READJSON.keywordTracker_18 = true
+            <mark name="cmd:stopaudio,data:{+scope+:1,+channel+:2,+FadeOutTime+:0.0}"/> # Turn off the stinger
+            ^eb_set_output_type(STINGER)
+            <mark name="cmd:playaudio,data:{+SoundToPlay+:+sc_click_farmer_superpissed_02+,+LoopSound+:false,+playInBackground+:false,+ReplaceCurrentSound+:false,+PlayImmediate+:true,+Volume+:1.0,+AudioTimelineField+:+none+}"/>
+        b: STT_PARTIAL_19 ($T_READJSON.keywordTracker_19!=true (furious))
+            $T_READJSON.no_moxie_end_attempts = 3
+            $T_READJSON.keywordTracker_19 = true
+            <mark name="cmd:stopaudio,data:{+scope+:1,+channel+:2,+FadeOutTime+:0.0}"/> # Turn off the stinger
+            ^eb_set_output_type(STINGER)
+            <mark name="cmd:playaudio,data:{+SoundToPlay+:+sc_click_farmer_superpissed_03+,+LoopSound+:false,+playInBackground+:false,+ReplaceCurrentSound+:false,+PlayImmediate+:true,+Volume+:1.0,+AudioTimelineField+:+none+}"/>
+        b: STT_PARTIAL_20 ($T_READJSON.keywordTracker_20!=true ([get own] *~4 typewriter))
+            $T_READJSON.no_moxie_end_attempts = 3
+            $T_READJSON.keywordTracker_20 = true
+            <mark name="cmd:stopaudio,data:{+scope+:1,+channel+:2,+FadeOutTime+:0.0}"/> # Turn off the stinger
+            ^eb_set_output_type(STINGER)
+            <mark name="cmd:playaudio,data:{+SoundToPlay+:+sc_click_angry_type_01+,+LoopSound+:false,+playInBackground+:false,+ReplaceCurrentSound+:false,+PlayImmediate+:true,+Volume+:1.0,+AudioTimelineField+:+none+}"/>
+        b: STT_PARTIAL_21 ($T_READJSON.keywordTracker_21!=true ([get own] *~4 typewriter))
+            $T_READJSON.no_moxie_end_attempts = 3
+            $T_READJSON.keywordTracker_21 = true
+            <mark name="cmd:stopaudio,data:{+scope+:1,+channel+:2,+FadeOutTime+:0.0}"/> # Turn off the stinger
+            ^eb_set_output_type(STINGER)
+            <mark name="cmd:playaudio,data:{+SoundToPlay+:+sc_click_angry_type_01+,+LoopSound+:false,+playInBackground+:false,+ReplaceCurrentSound+:false,+PlayImmediate+:true,+Volume+:1.0,+AudioTimelineField+:+none+}"/>
+        b: STT_PARTIAL_22 ($T_READJSON.keywordTracker_22!=true (<< [duck door]  knock >>))
+            $T_READJSON.no_moxie_end_attempts = 3
+            $T_READJSON.keywordTracker_22 = true
+            <mark name="cmd:stopaudio,data:{+scope+:1,+channel+:2,+FadeOutTime+:0.0}"/> # Turn off the stinger
+            ^eb_set_output_type(STINGER)
+            <mark name="cmd:playaudio,data:{+SoundToPlay+:+sc_click_door_knock_01+,+LoopSound+:false,+playInBackground+:false,+ReplaceCurrentSound+:false,+PlayImmediate+:true,+Volume+:1.0,+AudioTimelineField+:+none+}"/>
+        b: STT_PARTIAL_23 ($T_READJSON.keywordTracker_23!=true (duck *~4 neutral))
+            $T_READJSON.no_moxie_end_attempts = 3
+            $T_READJSON.keywordTracker_23 = true
+            <mark name="cmd:stopaudio,data:{+scope+:1,+channel+:2,+FadeOutTime+:0.0}"/> # Turn off the stinger
+            ^eb_set_output_type(STINGER)
+            <mark name="cmd:playaudio,data:{+SoundToPlay+:+sc_click_duck_quack_2+,+LoopSound+:false,+playInBackground+:false,+ReplaceCurrentSound+:false,+PlayImmediate+:true,+Volume+:1.0,+AudioTimelineField+:+none+}"/>
+        b: STT_PARTIAL_24 ($T_READJSON.keywordTracker_24!=true (neutral *~1 party))
+            $T_READJSON.no_moxie_end_attempts = 3
+            $T_READJSON.keywordTracker_24 = true
+            <mark name="cmd:stopaudio,data:{+scope+:1,+channel+:2,+FadeOutTime+:0.0}"/> # Turn off the stinger
+            ^eb_set_output_type(STINGER)
+            <emphasis level="strong">That's funny!</emphasis>
+        b: STT_PARTIAL_25 ($T_READJSON.keywordTracker_25!=true (emergency *~2 [meet meat]))
+            $T_READJSON.no_moxie_end_attempts = 3
+            $T_READJSON.keywordTracker_25 = true
+            <mark name="cmd:stopaudio,data:{+scope+:1,+channel+:2,+FadeOutTime+:0.0}"/> # Turn off the stinger
+            ^eb_set_output_type(STINGER)
+            <mark name="cmd:playaudio,data:{+SoundToPlay+:+sc_click_crowd_murmur_lp_01+,+LoopSound+:false,+playInBackground+:false,+ReplaceCurrentSound+:false,+PlayImmediate+:true,+Volume+:1.0,+AudioTimelineField+:+none+}"/>
+        b: STT_PARTIAL_26 ($T_READJSON.keywordTracker_26!=true ([(leave *~2 outside) (~swap *~2 typwriter)]))
+            $T_READJSON.no_moxie_end_attempts = 3
+            $T_READJSON.keywordTracker_26 = true
+            <mark name="cmd:stopaudio,data:{+scope+:1,+channel+:2,+FadeOutTime+:0.0}"/> # Turn off the stinger
+            ^eb_set_output_type(STINGER)
+            <mark name="cmd:playaudio,data:{+SoundToPlay+:+moxie_mu_reading_farm_interlude_compromise_v1+,+LoopSound+:false,+playInBackground+:false,+channel+:2,+ReplaceCurrentSound+:false,+PlayImmediate+:true,+Volume+:0.50,+FadeInTime+:2.0,+FadeOutTime+:4.0,+AudioTimelineField+:+none+}"/>
+        b: STT_PARTIAL_27 ($T_READJSON.keywordTracker_27!=true (deal))
+            $T_READJSON.no_moxie_end_attempts = 3
+            $T_READJSON.keywordTracker_27 = true
+            <mark name="cmd:stopaudio,data:{+scope+:1,+channel+:2,+FadeOutTime+:0.0}"/> # Turn off the stinger
+            ^eb_set_output_type(STINGER)
+            <mark name="cmd:playaudio,data:{+SoundToPlay+:+sc_click_group_sleep_lp_01+,+LoopSound+:false,+playInBackground+:false,+ReplaceCurrentSound+:false,+PlayImmediate+:true,+Volume+:1.0,+AudioTimelineField+:+none+}"/>
+        b: STT_PARTIAL_28 ($T_READJSON.keywordTracker_28!=true (waited))
+            $T_READJSON.no_moxie_end_attempts = 3
+            $T_READJSON.keywordTracker_28 = true
+            <mark name="cmd:stopaudio,data:{+scope+:1,+channel+:2,+FadeOutTime+:0.0}"/> # Turn off the stinger
+            ^eb_set_output_type(STINGER)
+        b: STT_PARTIAL_29 ($T_READJSON.keywordTracker_29!=true (pond *~2 boring))
+            $T_READJSON.no_moxie_end_attempts = 3
+            $T_READJSON.keywordTracker_29 = true
+            <mark name="cmd:stopaudio,data:{+scope+:1,+channel+:2,+FadeOutTime+:0.0}"/> # Turn off the stinger
+            ^eb_set_output_type(STINGER)
+            <mark name="cmd:playaudio,data:{+SoundToPlay+:+moxie_mu_reading_farm_interlude_twistoffate_v1+,+LoopSound+:false,+playInBackground+:false,+channel+:2,+ReplaceCurrentSound+:false,+PlayImmediate+:true,+Volume+:1.0,+FadeInTime+:0.0,+FadeOutTime+:0.0,+AudioTimelineField+:+none+}"/>
+        b: STT_PARTIAL_30 ($T_READJSON.keywordTracker_30!=true (dive *~2 board))
+            $T_READJSON.no_moxie_end_attempts = 3
+            $T_READJSON.keywordTracker_30 = true
+            <mark name="cmd:stopaudio,data:{+scope+:1,+channel+:2,+FadeOutTime+:0.0}"/> # Turn off the stinger
+            ^eb_set_output_type(STINGER)
+            <mark name="cmd:playaudio,data:{+SoundToPlay+:+sc_click_typewriter_lp_01+,+LoopSound+:false,+playInBackground+:false,+ReplaceCurrentSound+:false,+PlayImmediate+:true,+Volume+:1.0,+AudioTimelineField+:+none+}"/>
+        b: STT_PARTIAL_31 ($T_READJSON.keywordTracker_31!=true (quack))
+            $T_READJSON.no_moxie_end_attempts = 3
+            $T_READJSON.keywordTracker_31 = true
+            <mark name="cmd:stopaudio,data:{+scope+:1,+channel+:2,+FadeOutTime+:0.0}"/> # Turn off the stinger
+            ^eb_set_output_type(STINGER)
+            <mark name="cmd:playaudio,data:{+SoundToPlay+:+sc_click_duck_quack_01+,+LoopSound+:false,+playInBackground+:false,+ReplaceCurrentSound+:false,+PlayImmediate+:true,+Volume+:1.0,+AudioTimelineField+:+none+}"/>
+        b: STT_PARTIAL_32 ($T_READJSON.keywordTracker_32!=true (cow))
+            $T_READJSON.no_moxie_end_attempts = 3
+            $T_READJSON.keywordTracker_32 = true
+            <mark name="cmd:stopaudio,data:{+scope+:1,+channel+:2,+FadeOutTime+:0.0}"/> # Turn off the stinger
+            ^eb_set_output_type(STINGER)
+            <mark name="cmd:playaudio,data:{+SoundToPlay+:+sc_click_cow_moo_01+,+LoopSound+:false,+playInBackground+:false,+ReplaceCurrentSound+:false,+PlayImmediate+:true,+Volume+:1.0,+AudioTimelineField+:+none+}"/>
+        b: STT_PARTIAL_33 ($T_READJSON.keywordTracker_33!=true (cow))
+            $T_READJSON.no_moxie_end_attempts = 3
+            $T_READJSON.keywordTracker_33 = true
+            <mark name="cmd:stopaudio,data:{+scope+:1,+channel+:2,+FadeOutTime+:0.0}"/> # Turn off the stinger
+            ^eb_set_output_type(STINGER)
+            <mark name="cmd:playaudio,data:{+SoundToPlay+:+sc_click_cow_moo_01+,+LoopSound+:false,+playInBackground+:false,+ReplaceCurrentSound+:false,+PlayImmediate+:true,+Volume+:1.0,+AudioTimelineField+:+none+}"/>
+        b: STT_PARTIAL_34 ($T_READJSON.keywordTracker_34!=true (clickity clack quack))
+            $T_READJSON.no_moxie_end_attempts = 3
+            $T_READJSON.keywordTracker_34 = true
+            <mark name="cmd:stopaudio,data:{+scope+:1,+channel+:2,+FadeOutTime+:0.0}"/> # Turn off the stinger
+            ^eb_set_output_type(STINGER)
+    # if we are off cool down, and response a final, look for match
+    a: STT_FINALS(!$eb_state_speechfinal=false ^compareTime($T_READJSON.ActiveListenJSON.cool_down $T_READJSON.ActiveListenJSON.last_output )=true) ^refine()      
+## start of matching for events
+b: CHANGE_MUSIC (([(!~negation [(can *~1 [we you ~botname I] *~3 [change choose switch ~different another] *~3 {background} [song music tune]) ([I we] *~2 [ (would {~intensifier} [like love]) want] *~3 {a} [~different switch change another] *~2 {background} [song music tune]) ({~botname} let us *~3 {a} [~different another switch change] *~2 {background} [song music tune]) (< {~botname}{please} {a} [~different change switch] *~1 {background} [song music tune] *~1 {please}{~botname} >)]) ([I we] *~1 ~dislike *~3 {background} [song music tune])]))
+    Okay! ^MACRO_Reading_bgMusic()
+b: STOP_MUSIC ((!~negation [(can *~1 [we you ~botname I] *~3 [stop] *~2 {background} [song music tune])([I we] *~2 [ (would {~intensifier} [like love]) want] {you} *~2 ~stop *~2 {background} [song music tune]  *~1 {please}{~botname})({~botname} let us *~3 ~stop *~2 {background} [song music tune] *~1 {please})(< {~botname}{please} {a} ~stop *~1 {background} [song music tune] *~1 {please}{~botname} >)]))
+    Okay! <mark name="cmd:stopaudio,data:{+scope+:0,+channel+:0,+FadeOutTime+:0.0,+ClearQueue+:true}"/>  
+b: TURN_ON_MUSIC ((!~negation [(can *~1 [we you ~botname I] *~3 [play ~start ([turn switch put] on)] *~2 {background} [song music tune])([I we] *~2 [ (would {~intensifier} [like love]) want] {you} *~2 [play ~start ([turn switch put] on)] *~2 {background} [song music tune]  *~1 {please}{~botname})({~botname} let us *~3 [play ~start ([turn switch put] on)] *~2 {background} [song music tune] *~1 {please})(< {~botname}{please} {a} [play ~start ([turn switch put] on)] *~1 {background} [song music tune] *~1 {please}{~botname} >)]))
+    <mark name="cmd:behaviour-tree,data:{+transition+:0.5,+duration+:1.0,+repeat+:1,+layerBlendInTime+:0.5,+layerBlendOutTime+:0.5,+blocking+:false,+action+:4,+variableName+:++,+variableValue+:++,+eventName+:+Gesture_Talk+,+lifetime+:0,+category+:+None+,+behaviour+:++,+Track+:++}"/><usel variant="0" genre="motivational">Okay! Music, on! </usel><mark name="cmd:behaviour-tree,data:{+transition+:0.5,+duration+:1.0,+repeat+:1,+layerBlendInTime+:0.5,+layerBlendOutTime+:0.5,+blocking+:false,+action+:4,+variableName+:++,+variableValue+:++,+eventName+:+Gesture_None+,+lifetime+:0,+category+:+None+,+behaviour+:++,+Track+:++}"/> <mark name="cmd:stopaudio,data:{+scope+:0,+channel+:0,+FadeOutTime+:0.0,+ClearQueue+:true}"/>   <mark name="cmd:playaudio,data:{+SoundToPlay+:+moxie_mu_reading_farm_neutral_loop_v1+,+LoopSound+:true,+playInBackground+:true,+ReplaceCurrentSound+:false,+PlayImmediate+:true,+Volume+:0.5,+AudioTimelineField+:+none+}"/>
+b: CHANGE_BOOK ((!~negation [(can *~1 [we you ~botname I] *~2 [change choose switch ~different another] *~3 ~bookmagazine) ([I we] *~2 [ (will {~intensifier} [like love]) want] *~3 {a} [~different switch change another] *~2 ~bookmagazine ) ({~botname} let us *~3 {a} [~different another switch change] *~2 ~bookmagazine ) (< {~botname}{please} {a} [~different change switch] *~1 ~bookmagazine *~1 {please}{~botname} >) ([want (let us)] *~2 read *~1 something_else) (can *~1 [we you ~botname I] *~1 read *~1 something_else)]))
+    Okay!
+            $T_READJSON.ActiveListenJSON = null
+    ^eb_accept_partials(false) # Turning off partials
+    ^eb_set_output_type(GLOBAL_COMMAND) # to exit despite Mentor not targeted/engaged
+    ^eb_disable_prepend_moxie() # Turn off prepending Moxie's name
+    # Exit Node
+    ^gambit(~READ_Portal_Book_Reading_change_book_UNROLLED_CID_click_clack_moo_cows_that_type) # Gambit Specific Path
+## end of matching for events
+    # on STT Final, reset partial tracker.
+    a: RESET_PARTIAL_TRACKER(!$eb_state_speechfinal=false $T_READJSON.ActiveListenJSON!=null)
+        $T_READJSON.ActiveListenJSON.partial_tracker = ^jsoncreate(permanent object)
+u: NO_MOXIE_END(!$eb_state_speechfinal=false (^readingPattern_endBook_noMoxie()))
+    ^log_write(BOTH info "the end count $T_READJSON.no_moxie_end_attempts")
+    $T_READJSON.no_moxie_end_attempts -= 1
+    if($T_READJSON.no_moxie_end_attempts == 0){
+        ^reuse(END_ACTIVE_LISTENING)
+    }
+# If the user goes out of view multiple times
+u: NEEDY_USER("signal-engagement-event")
+    if($T_READJSON.engagement_event_first)
+    {
+        $$State_noPrelude = true
+        ^doCatchall()
+        ^noRepeat()
+        <break time="0.1s"/>
+        ^norejoinder()
+    }
+    else
+    {
+        $T_READJSON.engagement_event_first += 1
+        ^MACRO_Reading_reading_lost_target_prompt()
+    }
+    a: YES (!$eb_state_speechfinal=false [(^globalPattern_yesBot())(^globalpattern_beAffirmative())])
+        ^MACRO_Reading_reading_lost_target_yes()
+        ^eb_set_output_type(GLOBAL_COMMAND) # respond despite engagement
+    a: NO (!$eb_state_speechfinal=false [(^globalPattern_noBot())(^globalpattern_beNegative())])
+        ^MACRO_Reading_reading_lost_target_no()
+        ^eb_set_output_type(GLOBAL_COMMAND) # respond despite engagement
+    a: OTHERS (!$eb_state_speechfinal=false ^gbl_fallback())
+        ^explicitSilence_noRejoinder() # silently(?) not respond to user
+        if($T_READJSON.engagement_event_first == 1)
+        {
+            # after first final, listen for answer on second final
+            ^keepRejoinder()
+            # incrememnt counter
+            $T_READJSON.engagement_event_first += 1
+        }
+    a: PARTIALS_IN_REJOINDER($eb_state_speechfinal=false)
+        # keep this rejoinder, but don't end rule matching
+        ^keepRejoinder()
+u: NO_MATCH($eb_state_speechfinal=false !^globalCommand_all())
+    ^keepRejoinder()
+    ^silentCatchall()
+u:  BLOCK_GLOBAL_TANGENTS(!$eb_state_speechfinal=false [(^tangentPattern_what_do_you_mean()) ([^globalPattern_childQuit() ^globalPattern_doSomethingDifferentBot()]) ] )
+    ^silentCatchall()
+# We are not expecting to respond to all input, so silent catch all
+u: FALLBACK (^gbl_fallback())
+    $T_READJSON.no_moxie_end_attempts = 3
+    ^silentCatchall()

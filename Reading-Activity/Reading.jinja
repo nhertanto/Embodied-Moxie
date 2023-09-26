@@ -1,0 +1,158 @@
+# *************************************************************************************
+# README:
+# The Reading node's focus is to allow the child to be able to read any book they want,
+#    and in the meantime, Moxie would be listening to certain words using
+#    speech-to-text (STT) partials to play fun sound effects!
+#    Here, the child should be able to read uninterrupted, with the only phrase
+#    to exit this node would be the global commands and the exit commands (ex. "Moxie 
+#    the end"). Since there's no way to know what the child could say while reading
+#    a book, that's why we kept the exiting phrases limited! For example, if the 
+#    child said "the end," there's no way to know if they meant to exit or if they
+#    said something like "and that's the end of the Pikachu Brigade's attack!" thus
+#    by design, the child must say, "the end" three times to exit, or must say, 
+#    "Moxie the end"
+# NOTE:
+#    This jinja file extends from the ActiveListening.jinja
+# *************************************************************************************
+
+{% extends "ActiveListening.jinja" %}
+
+{# The following topic flags allows for Moxie to not listen react to any phrases, except for global commands #}
+{#   and phrases meant to exit the reading experience.   #}
+{% block topic_rb_flags %} [ noPolite noYoureWelcome ?eb-cat-nap handle-engagement-events ?eb-reprompt {{topic_flags}}] {% endblock %}
+
+{% block prompt_content %}
+    {{util.var_name("engagement_event_first", module_id)}} = 0 # For NEEDY USER rule
+    {{util.var_name("no_moxie_end_attempts", module_id)}} = 3 # Mentor must say 'the end' without Moxie twice to exit
+
+    ^eb_accept_partials(true) {# Turning on speech-to-text (STT) partials #}
+    ^eb_enable_prepend_moxie() {# Turn on prepending Moxie's name - for "Moxie the end" #}
+
+    {# Create a variable to keep track of each STT Partial rule that fires #}
+    {% for line in csv_data %}
+    {% set new_name %}keywordTracker_{{loop.index}}{% endset %}
+    {{util.var_name(new_name, module_id)}} = null
+    {% endfor %}
+
+    {{super()}}
+{% endblock prompt_content %}
+
+{% block reprompt_content %}
+    ^eb_accept_partials(true)
+    ^eb_block_cutoff()
+    ^eb_enable_prepend_moxie()
+    {{super()}}
+{% endblock reprompt_content %}
+  
+
+{# Returning everything to normal when we exit from END_ACTIVE_LISTENING PATTERN #}
+{% block end_rule %}
+u: END_ACTIVE_LISTENING(!$eb_state_speechfinal=false {{end_pattern}})
+    ^eb_accept_partials(false) # Turning off partials
+    ^eb_set_output_type(GLOBAL_COMMAND) # to exit despite Mentor not targeted/engaged
+    ^eb_disable_prepend_moxie() # Turn off prepending Moxie's name
+    {{exit_code(end_move_on_topic)}}
+{% endblock end_rule %}
+
+{# Returning everything to normal when we exit from EXIT_ACTIVE_LISTENING PATTERN #}
+{% block exit_rule %}
+{% if exit_pattern and exit_move_on_topic %}
+u: EXIT_ACTIVE_LISTENING(!$eb_state_speechfinal=false {{exit_pattern}})
+    ^eb_accept_partials(false) # Turning off partials
+    ^eb_set_output_type(GLOBAL_COMMAND) # to exit despite Mentor not targeted/engaged
+    ^eb_disable_prepend_moxie() # Turn off prepending Moxie's name
+    {{exit_code(exit_move_on_topic)}}
+{% endif %}
+{% endblock exit_rule %}
+
+{% block match_input_pattern %} !$$signal {% endblock match_input_pattern %}
+
+{# Returning everything to normal when we exit from Events #}
+{% block leave_events_extra_rules %}
+    ^eb_accept_partials(false) # Turning off partials
+    ^eb_set_output_type(GLOBAL_COMMAND) # to exit despite Mentor not targeted/engaged
+    ^eb_disable_prepend_moxie() # Turn off prepending Moxie's name
+{% endblock leave_events_extra_rules %}
+
+{# Turning on STT Partials by looking at the patterns in a csv sheet #}
+{% block partial_rules %}
+
+    a: STT_PARTIAL (^compareTime( {{util.var_name("ActiveListenJSON.cool_down", module_id)}} {{util.var_name("ActiveListenJSON.last_output", module_id)}} )=true) ^refine()
+        #{{util.var_name("no_moxie_end_attempts", module_id)}} = 3
+        {% for line in csv_data if line["Type"].lower != "comment" %}
+        {% set new_name %}keywordTracker_{{loop.index}}{% endset %}
+        {# Each pattern we are listening for, and if activated, do the markup #}
+        b: STT_PARTIAL_{{loop.index|upper}} ({{util.var_name(new_name, module_id)}}!=true ({{line["Keywords"]}}))
+            {{util.var_name("no_moxie_end_attempts", module_id)}} = 3
+            {{util.var_name(new_name, module_id)}} = true
+            <mark name="cmd:stopaudio,data:{+scope+:1,+channel+:2,+FadeOutTime+:0.0}"/> # Turn off the stinger
+            ^eb_set_output_type(STINGER)
+            {{line["Markup"]}}
+        {% endfor %}
+{% endblock partial_rules %}
+
+{% block rules_before_fallback %} 
+
+u: NO_MOXIE_END(!$eb_state_speechfinal=false {{no_moxie_end_pattern}})
+    ^log_write(BOTH info "the end count {{util.var_name("no_moxie_end_attempts", module_id)}}")
+
+    {{util.var_name("no_moxie_end_attempts", module_id)}} -= 1
+    
+    {# After the 3rd time Mentor says 'the end' without Moxie's name, exit node #}
+    if({{util.var_name("no_moxie_end_attempts", module_id)}} == 0){
+        ^reuse(END_ACTIVE_LISTENING)
+    }
+
+{# If the user goes out of view multiple times #}
+u: NEEDY_USER("signal-engagement-event")
+    
+    if({{util.var_name("engagement_event_first", module_id)}})
+    {
+        $$State_noPrelude = true
+        ^doCatchall()
+        ^noRepeat()
+        <break time="0.1s"/>
+        ^norejoinder()
+    }
+    else
+    {
+        {{util.var_name("engagement_event_first", module_id)}} += 1
+        ^MACRO_Reading_reading_lost_target_prompt()
+    }
+
+    a: YES (!$eb_state_speechfinal=false [(^globalPattern_yesBot())(^globalpattern_beAffirmative())])
+        ^MACRO_Reading_reading_lost_target_yes()
+        ^eb_set_output_type(GLOBAL_COMMAND) # respond despite engagement
+
+    a: NO (!$eb_state_speechfinal=false [(^globalPattern_noBot())(^globalpattern_beNegative())])
+        ^MACRO_Reading_reading_lost_target_no()
+        ^eb_set_output_type(GLOBAL_COMMAND) # respond despite engagement
+
+    a: OTHERS (!$eb_state_speechfinal=false ^gbl_fallback())
+        ^explicitSilence_noRejoinder() # silently(?) not respond to user
+
+        if({{util.var_name("engagement_event_first", module_id)}} == 1)
+        {
+            # after first final, listen for answer on second final
+            ^keepRejoinder()
+            # incrememnt counter
+            {{util.var_name("engagement_event_first", module_id)}} += 1
+        }
+
+    a: PARTIALS_IN_REJOINDER($eb_state_speechfinal=false)
+        # keep this rejoinder, but don't end rule matching
+        ^keepRejoinder()
+
+u: NO_MATCH($eb_state_speechfinal=false !^globalCommand_all())
+    ^keepRejoinder()
+    ^silentCatchall()
+
+u:  BLOCK_GLOBAL_TANGENTS(!$eb_state_speechfinal=false [(^tangentPattern_what_do_you_mean()) ([^globalPattern_childQuit() ^globalPattern_doSomethingDifferentBot()]) ] )
+    ^silentCatchall()
+{% endblock rules_before_fallback %}
+
+{% block activeListening_fallback %}
+u: FALLBACK (^gbl_fallback())
+    {{util.var_name("no_moxie_end_attempts", module_id)}} = 3
+    ^silentCatchall()
+{% endblock activeListening_fallback %}
