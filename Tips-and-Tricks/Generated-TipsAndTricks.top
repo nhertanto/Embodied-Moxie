@@ -1,0 +1,372 @@
+# *****************************************************************************
+# README:
+# Here's the part of the generated code showcasing the Global Command Node
+#   in the Tips and Tricks activity.
+#   In this example, we are practicing "Moxie please go to sleep"
+# *****************************************************************************
+
+# GLOBAL COMMAND NODE START #
+
+topic:  ~TNT_FTE_Sleep_Intro   keep repeat   [ handleSleep noPolite ?eb-oov-target handleInterrupt ] 
+t: PROMPT() ^keep() ^repeat()
+    # prompt markup/text
+    ^MACRO_TipsAndTricks_SLEEP_ICON() ^MACRO_TipsAndTricks_ENTRY_START_OF_TIP_SFX() ^MACRO_TipsAndTricks_KILL_ICONS()
+    # prompt markup 2
+    <usel variant="2" genre="none">This time we're going to learn Moxie, please go to sleep!</usel><usel variant="0" genre="none"> If we're done playing together,</usel><usel variant="1" genre="none"></usel>you can ask me to go to sleep.
+    # prompt markup 3
+    ^MACRO_TipsAndTricks_KILL_ICONS() So, ^getCurrentUser() , when you hear the bell, ^MACRO_TipsAndTricks_SCENARIO_CHIME_SFX() say Moxie, please go to sleep, and I'll take a nap until you're ready to play again.
+    # prompt markup 4
+    <break time="1s"/>  ^MACRO_TipsAndTricks_SCENARIO_CHIME_SFX() 
+    $T_TNTJSON.timed_out_count = 1 # Ensures we timed out once
+    $T_TNTJSON.almost_success_attempts = 3 # Ensures we only do the ALMOST_SUCCESS rule 3 times max
+    $T_TNTJSON.yes_count = 1 # Ensures we only say "Yes" once
+    $T_TNTJSON.didnt_say_moxie_count = 2 # Ensures we only trigger DIDNT_SAY_MOXIE twice
+    $T_TNTJSON.no_understand_count = 2 # Ensures we only trigger NO_UNDERSTAND twice
+    $T_TNTJSON.gbl_fallback_count = 3 # Ensures we only do the FALLBACK_HANDLER rule 3 times max
+    ^enableTimerReprompt()
+u: CLARIFICATION(^gbl_clarification())
+    # written clarification output
+    ^GeneralOutput(REPHRASE) ^MACRO_TipsAndTricks_SLEEP_REPHRASE() ^MACRO_TipsAndTricks_NODE_REPEAT_COMMAND() <usel variant="1" genre="none">Moxie, please go to sleep!</usel>
+u: REPROMPT(^gbl_reprompt())
+    # reprompt text
+    ^MACRO_TipsAndTricks_HELLO_RESET()   <mark name="cmd:behaviour-tree,data:{+transition+:0.5,+duration+:1.0,+repeat+:1,+layerBlendInTime+:0.5,+layerBlendOutTime+:0.5,+blocking+:false,+action+:4,+variableName+:++,+variableValue+:++,+eventName+:+Gesture_Point+,+lifetime+:0,+category+:+None+,+behaviour+:++,+Track+:++}"/>Say, <usel variant="1" genre="None">Moxie, please go to sleep,</usel>  ^MACRO_TipsAndTricks_KILL_ICONS() <mark name="cmd:behaviour-tree,data:{+transition+:0.5,+duration+:1.0,+repeat+:1,+layerBlendInTime+:0.5,+layerBlendOutTime+:0.5,+blocking+:false,+action+:4,+variableName+:++,+variableValue+:++,+eventName+:+Gesture_Talk+,+lifetime+:0,+category+:+None+,+behaviour+:++,+Track+:++}"/><usel variant="2" genre="none">after you hear the bell! <mark name="cmd:behaviour-tree,data:{+transition+:0.5,+duration+:1.0,+repeat+:1,+layerBlendInTime+:0.5,+layerBlendOutTime+:0.5,+blocking+:false,+action+:4,+variableName+:++,+variableValue+:++,+eventName+:+Gesture_None+,+lifetime+:0,+category+:+None+,+behaviour+:++,+Track+:++}"/></usel> ^MACRO_TipsAndTricks_SCENARIO_CHIME_SFX() <break time="1s"/>
+# After the Mentor doesn't say anything for a while
+u: TIMED_OUT (eb-wait-complete) ^keep() ^repeat()
+    # Reprompt after 1st time Moxie timed out
+    if($T_TNTJSON.timed_out_count > 0){
+        $T_TNTJSON.timed_out_count -= 1
+        ^enableLongTimer()
+        ^reuse(REPROMPT)
+    }
+    else {
+    # Exit Node
+    ^gambit(~TNT_FTE_Sleep_timed_out_prompt) # Gambit Specific Path
+    }
+# The Mentor says the chosen Global Command (ex. "Moxie go to sleep")
+u: SUCCESS (signal-sleep)
+    ^analyze(%originalinput)
+    ^refine()
+    a: MOXIE_ONLY (!please ^globalPattern_moxie() >)
+        ^reuse(HEARD_JUST_MOXIE)
+    a: SCAFFOLD_PART01_CLOSE_TO_COMMAND ($T_TNTJSON.scaffold=1 (~botname *~3 [please pwease lease least]))
+        ^reuse(SCAFFOLD_PART01)
+    a: SCAFFOLD_PART02_CLOSE_TO_COMMAND ($T_TNTJSON.scaffold=2 (go *~1 sleep))
+        ^reuse(SCAFFOLD_PART02)
+    # The Mentor forgot to say "Moxie" - exit after failing twice
+    a: DIDNT_SAY_MOXIE ($$GC_node_said_Moxie!=true ^fallbackPattern_noBotNameSleep())
+        if($T_TNTJSON.didnt_say_moxie_count > 0){
+    ^MACRO_TipsAndTricks_NODE_FORGOT_MOXIE_NAME()
+            $T_TNTJSON.didnt_say_moxie_count -= 1
+        }
+        else {
+    # Exit Node
+    ^gambit(~TNT_FTE_Sleep_Failed_to_say_Command) # Gambit Specific Path
+        }
+    # What the Mentor said hits the signal, but shouldn't be considered a COMPLETE_SUCCESS
+    a: CLOSE_TO_COMMAND (^fallbackPattern_gcSleep())
+        ^reuse(ALMOST_SUCCESS)
+    # The Mentor said it perfectly!
+    a: COMPLETE_SUCCESS()
+        ^eb_set_output_type(GLOBAL_COMMAND)
+        ^eb_look_at_speaker(true)
+    ^MACRO_TipsAndTricks_CORRECT_ANSWER_SFX() <break time="1s"/>  ^MACRO_TipsAndTricks_SLEEP_SUCCESS() <break time="3s"/>  
+    # Exit Node
+    ^gambit(~TNT_FTE_Sleep_Success) # Gambit Specific Path
+# If the Mentor says part 1 of the scaffolded pattern correctly, say part 2
+u: SCAFFOLD_PART01 ($T_TNTJSON.scaffold=1 (~botname *~3 [please pwease lease least]))
+    ^MACRO_TipsAndTricks_NODE_SUCCESS() ^MACRO_TipsAndTricks_NODE_REPEAT_COMMAND() go to sleep!
+    $T_TNTJSON.scaffold = 2
+# If the Mentor says part 2 of the scaffolded pattern correctly, prompt them to say the full command!
+u: SCAFFOLD_PART02 ($T_TNTJSON.scaffold=2 (go *~1 sleep))
+    ^MACRO_TipsAndTricks_NODE_SUCCESS() ^MACRO_TipsAndTricks_NODE_SAY_FULL_COMMAND() ^MACRO_TipsAndTricks_NODE_REPEAT_COMMAND() <usel variant="1" genre="none">Moxie, please go to sleep!</usel>
+    $T_TNTJSON.scaffold = 3
+# In case asr splits "Moxie" from the rest of the global command
+  # Added !please to prevent the scaffolding parts getting stuck here!
+u: HEARD_JUST_MOXIE(!please ^globalPattern_moxie())
+    ^outputSilence()
+    ^enableShortTimer()
+    a: HEARD_REST_OF_COMMAND(signal-sleep)
+        $$GC_node_said_Moxie = true
+        ^reuse(SUCCESS)
+    a: HEARD_NOTHING_AFTERWARDS(eb-wait-complete)
+        ^reuse(FALLBACK_HANDLER)
+# In case we get an interrupting  "Moxie" or "Moxie hold on"
+u: MOXIE_INTERRUPT(signal-interrupt)
+    ^outputSilence()
+    ^enableTimerReprompt()
+    ^setrejoinder(HEARD_JUST_MOXIE)
+# The Mentor almost said the command correctly (ex. "Good night Moxie")
+u: ALMOST_SUCCESS (^fallbackPattern_gcSleep())
+    $T_TNTJSON.almost_success_attempts -= 1
+    if($T_TNTJSON.almost_success_attempts == 2){
+    ^MACRO_TipsAndTricks_NODE_BREAK_UP_COMMAND() ^MACRO_TipsAndTricks_NODE_REPEAT_COMMAND() <usel variant="1" genre="none">Moxie</usel>,  please.
+        $T_TNTJSON.scaffold = 1
+    }   
+    else if($T_TNTJSON.almost_success_attempts >= 0){
+    ^MACRO_TipsAndTricks_NODE_REMINDER() <usel variant="1" genre="none">Moxie, please go to sleep.</usel>
+    }    
+    else{
+    # Exit Node
+    ^gambit(~TNT_FTE_Sleep_Failed_to_say_Command) # Gambit Specific Path
+    }
+# The Mentor is confused and doesn't understand what to do
+u: NO_UNDERSTAND (!((^globalPattern_doNegative()) *~3 want *~3 do) [(^globalPattern_idkBot()) (~negation * [know understand get (make * sense)]) (^globalPattern_childDontKnowHow()) forgot remind what explain "tell me"  ])
+    if ($T_TNTJSON.no_understand_count > 0){
+    ^GeneralOutput(REPHRASE) ^MACRO_TipsAndTricks_SLEEP_REPHRASE()
+        $T_TNTJSON.no_understand_count -= 1
+    }
+    else{
+    # Exit Node
+    ^gambit(~TNT_FTE_Sleep_Failed_to_say_Command) # Gambit Specific Path
+    ]
+# The Mentor can't, or doesn't want to do this now.
+u: CANT_DO_IT ([(^globalPattern_canNegative()) (^globalPattern_noBot()) (^globalPattern_childNoMore()) ((^globalPattern_doNegative()) *~3 want *~3 do) (~not *~3 [do doing]) (^globalPattern_notNow()) ([let can shall] *~3 [do finish complete] *~5 [later tomorrow another other time different not_now]) ])
+    Oh, okay!
+    # Exit Node
+    ^gambit(~TNT_FTE_Sleep_refuses) # Gambit Specific Path
+# The Mentor says, "Yes" to show that they understand, but didn't say the command. Stay in node.
+u: YES_UNDERSTAND (^globalPattern_yesBot())
+    if ($T_TNTJSON.yes_count > 0){
+    ^MACRO_TipsAndTricks_NODE_SAY_YES()
+        $T_TNTJSON.yes_count -= 1
+    }
+    else{
+        ^reuse(FALLBACK_HANDLER)
+    }
+u: FALLBACK_HANDLER (^gbl_fallback())
+    $T_TNTJSON.gbl_fallback_count -= 1
+    if ($T_TNTJSON.gbl_fallback_count == 2){
+        # flush output to check if we have an output with CLARIFICATION
+        ^flushoutput()
+        $_response = %response
+        ^reuse(CLARIFICATION)
+        # if reprompt signal does not match rule in local context, must produce some output
+        if($_response == %response)
+        {
+            # If there's nothing written in CLARIFICATION, use text in NO_UNDERSTAND
+    ^GeneralOutput(REPHRASE) ^MACRO_TipsAndTricks_SLEEP_REPHRASE()
+        }
+    }
+    else if($T_TNTJSON.gbl_fallback_count > 0){
+    ^MACRO_TipsAndTricks_NODE_BREAK_UP_COMMAND() ^MACRO_TipsAndTricks_NODE_REPEAT_COMMAND() <usel variant="1" genre="none">Moxie</usel>,  please.
+        $T_TNTJSON.scaffold = 1
+    }
+    else{
+    # Exit Node
+    ^gambit(~TNT_FTE_Sleep_Failed_to_say_Command) # Gambit Specific Path
+    }
+# GLOBAL COMMAND NODE START #
+
+topic:  ~TNT_FTE_Sleep_Introduce_the_Scenario   keep repeat   [ handleSleep noPolite ?eb-oov-target handleInterrupt ] 
+t: PROMPT() ^keep() ^repeat()
+    # prompt markup/text
+    ^MACRO_TipsAndTricks_KILL_ICONS() So, ^getCurrentUser() , when you hear the bell, ^MACRO_TipsAndTricks_SCENARIO_CHIME_SFX() say Moxie, please go to sleep, and I'll take a nap until you're ready to play again.
+    # prompt markup 2
+    <break time="1s"/>  ^MACRO_TipsAndTricks_SCENARIO_CHIME_SFX() 
+    $T_TNTJSON.timed_out_count = 1 # Ensures we timed out once
+    $T_TNTJSON.almost_success_attempts = 3 # Ensures we only do the ALMOST_SUCCESS rule 3 times max
+    $T_TNTJSON.yes_count = 1 # Ensures we only say "Yes" once
+    $T_TNTJSON.didnt_say_moxie_count = 2 # Ensures we only trigger DIDNT_SAY_MOXIE twice
+    $T_TNTJSON.no_understand_count = 2 # Ensures we only trigger NO_UNDERSTAND twice
+    $T_TNTJSON.gbl_fallback_count = 3 # Ensures we only do the FALLBACK_HANDLER rule 3 times max
+    ^enableTimerReprompt()
+u: CLARIFICATION(^gbl_clarification())
+    # written clarification output
+    ^GeneralOutput(REPHRASE) ^MACRO_TipsAndTricks_SLEEP_REPHRASE() ^MACRO_TipsAndTricks_NODE_REPEAT_COMMAND() <usel variant="1" genre="none">Moxie, please go to sleep!</usel>
+u: REPROMPT(^gbl_reprompt())
+    # reprompt text
+    ^MACRO_TipsAndTricks_HELLO_RESET()   <mark name="cmd:behaviour-tree,data:{+transition+:0.5,+duration+:1.0,+repeat+:1,+layerBlendInTime+:0.5,+layerBlendOutTime+:0.5,+blocking+:false,+action+:4,+variableName+:++,+variableValue+:++,+eventName+:+Gesture_Point+,+lifetime+:0,+category+:+None+,+behaviour+:++,+Track+:++}"/>Say, <usel variant="1" genre="None">Moxie, please go to sleep,</usel>  ^MACRO_TipsAndTricks_KILL_ICONS() <mark name="cmd:behaviour-tree,data:{+transition+:0.5,+duration+:1.0,+repeat+:1,+layerBlendInTime+:0.5,+layerBlendOutTime+:0.5,+blocking+:false,+action+:4,+variableName+:++,+variableValue+:++,+eventName+:+Gesture_Talk+,+lifetime+:0,+category+:+None+,+behaviour+:++,+Track+:++}"/><usel variant="2" genre="none">after you hear the bell! <mark name="cmd:behaviour-tree,data:{+transition+:0.5,+duration+:1.0,+repeat+:1,+layerBlendInTime+:0.5,+layerBlendOutTime+:0.5,+blocking+:false,+action+:4,+variableName+:++,+variableValue+:++,+eventName+:+Gesture_None+,+lifetime+:0,+category+:+None+,+behaviour+:++,+Track+:++}"/></usel> ^MACRO_TipsAndTricks_SCENARIO_CHIME_SFX() <break time="1s"/>
+# After the Mentor doesn't say anything for a while
+u: TIMED_OUT (eb-wait-complete) ^keep() ^repeat()
+    # Reprompt after 1st time Moxie timed out
+    if($T_TNTJSON.timed_out_count > 0){
+        $T_TNTJSON.timed_out_count -= 1
+        ^enableLongTimer()
+        ^reuse(REPROMPT)
+    }
+    else {
+    # Exit Node
+    ^gambit(~TNT_FTE_Sleep_timed_out_prompt) # Gambit Specific Path
+    }
+# The Mentor says the chosen Global Command (ex. "Moxie go to sleep")
+u: SUCCESS (signal-sleep)
+    ^analyze(%originalinput)
+    ^refine()
+    a: MOXIE_ONLY (!please ^globalPattern_moxie() >)
+        ^reuse(HEARD_JUST_MOXIE)
+    a: SCAFFOLD_PART01_CLOSE_TO_COMMAND ($T_TNTJSON.scaffold=1 (~botname *~3 [please pwease lease least]))
+        ^reuse(SCAFFOLD_PART01)
+    a: SCAFFOLD_PART02_CLOSE_TO_COMMAND ($T_TNTJSON.scaffold=2 (go *~1 sleep))
+        ^reuse(SCAFFOLD_PART02)
+    # The Mentor forgot to say "Moxie" - exit after failing twice
+    a: DIDNT_SAY_MOXIE ($$GC_node_said_Moxie!=true ^fallbackPattern_noBotNameSleep())
+        if($T_TNTJSON.didnt_say_moxie_count > 0){
+    ^MACRO_TipsAndTricks_NODE_FORGOT_MOXIE_NAME()
+            $T_TNTJSON.didnt_say_moxie_count -= 1
+        }
+        else {
+    # Exit Node
+    ^gambit(~TNT_FTE_Sleep_Failed_to_say_Command) # Gambit Specific Path
+        }
+    # What the Mentor said hits the signal, but shouldn't be considered a COMPLETE_SUCCESS
+    a: CLOSE_TO_COMMAND (^fallbackPattern_gcSleep())
+        ^reuse(ALMOST_SUCCESS)
+    # The Mentor said it perfectly!
+    a: COMPLETE_SUCCESS()
+        ^eb_set_output_type(GLOBAL_COMMAND)
+        ^eb_look_at_speaker(true)
+    ^MACRO_TipsAndTricks_CORRECT_ANSWER_SFX() <break time="1s"/>  ^MACRO_TipsAndTricks_SLEEP_SUCCESS() <break time="3s"/>  
+    # Exit Node
+    ^gambit(~TNT_FTE_Sleep_Success) # Gambit Specific Path
+# If the Mentor says part 1 of the scaffolded pattern correctly, say part 2
+u: SCAFFOLD_PART01 ($T_TNTJSON.scaffold=1 (~botname *~3 [please pwease lease least]))
+    ^MACRO_TipsAndTricks_NODE_SUCCESS() ^MACRO_TipsAndTricks_NODE_REPEAT_COMMAND() go to sleep!
+    $T_TNTJSON.scaffold = 2
+# If the Mentor says part 2 of the scaffolded pattern correctly, prompt them to say the full command!
+u: SCAFFOLD_PART02 ($T_TNTJSON.scaffold=2 (go *~1 sleep))
+    ^MACRO_TipsAndTricks_NODE_SUCCESS() ^MACRO_TipsAndTricks_NODE_SAY_FULL_COMMAND() ^MACRO_TipsAndTricks_NODE_REPEAT_COMMAND() <usel variant="1" genre="none">Moxie, please go to sleep!</usel>
+    $T_TNTJSON.scaffold = 3
+# In case asr splits "Moxie" from the rest of the global command
+  # Added !please to prevent the scaffolding parts getting stuck here!
+u: HEARD_JUST_MOXIE(!please ^globalPattern_moxie())
+    ^outputSilence()
+    ^enableShortTimer()
+    a: HEARD_REST_OF_COMMAND(signal-sleep)
+        $$GC_node_said_Moxie = true
+        ^reuse(SUCCESS)
+    a: HEARD_NOTHING_AFTERWARDS(eb-wait-complete)
+        ^reuse(FALLBACK_HANDLER)
+# In case we get an interrupting  "Moxie" or "Moxie hold on"
+u: MOXIE_INTERRUPT(signal-interrupt)
+    ^outputSilence()
+    ^enableTimerReprompt()
+    ^setrejoinder(HEARD_JUST_MOXIE)
+# The Mentor almost said the command correctly (ex. "Good night Moxie")
+u: ALMOST_SUCCESS (^fallbackPattern_gcSleep())
+    $T_TNTJSON.almost_success_attempts -= 1
+    if($T_TNTJSON.almost_success_attempts == 2){
+    ^MACRO_TipsAndTricks_NODE_BREAK_UP_COMMAND() ^MACRO_TipsAndTricks_NODE_REPEAT_COMMAND() <usel variant="1" genre="none">Moxie</usel>,  please.
+        $T_TNTJSON.scaffold = 1
+    }   
+    else if($T_TNTJSON.almost_success_attempts >= 0){
+    ^MACRO_TipsAndTricks_NODE_REMINDER() <usel variant="1" genre="none">Moxie, please go to sleep.</usel>
+    }    
+    else{
+    # Exit Node
+    ^gambit(~TNT_FTE_Sleep_Failed_to_say_Command) # Gambit Specific Path
+    }
+# The Mentor is confused and doesn't understand what to do
+u: NO_UNDERSTAND (!((^globalPattern_doNegative()) *~3 want *~3 do) [(^globalPattern_idkBot()) (~negation * [know understand get (make * sense)]) (^globalPattern_childDontKnowHow()) forgot remind what explain "tell me"  ])
+    if ($T_TNTJSON.no_understand_count > 0){
+    ^GeneralOutput(REPHRASE) ^MACRO_TipsAndTricks_SLEEP_REPHRASE()
+        $T_TNTJSON.no_understand_count -= 1
+    }
+    else{
+    # Exit Node
+    ^gambit(~TNT_FTE_Sleep_Failed_to_say_Command) # Gambit Specific Path
+    ]
+# The Mentor can't, or doesn't want to do this now.
+u: CANT_DO_IT ([(^globalPattern_canNegative()) (^globalPattern_noBot()) (^globalPattern_childNoMore()) ((^globalPattern_doNegative()) *~3 want *~3 do) (~not *~3 [do doing]) (^globalPattern_notNow()) ([let can shall] *~3 [do finish complete] *~5 [later tomorrow another other time different not_now]) ])
+    Oh, okay!
+    # Exit Node
+    ^gambit(~TNT_FTE_Sleep_refuses) # Gambit Specific Path
+# The Mentor says, "Yes" to show that they understand, but didn't say the command. Stay in node.
+u: YES_UNDERSTAND (^globalPattern_yesBot())
+    if ($T_TNTJSON.yes_count > 0){
+    ^MACRO_TipsAndTricks_NODE_SAY_YES()
+        $T_TNTJSON.yes_count -= 1
+    }
+    else{
+        ^reuse(FALLBACK_HANDLER)
+    }
+u: FALLBACK_HANDLER (^gbl_fallback())
+    $T_TNTJSON.gbl_fallback_count -= 1
+    if ($T_TNTJSON.gbl_fallback_count == 2){
+        # flush output to check if we have an output with CLARIFICATION
+        ^flushoutput()
+        $_response = %response
+        ^reuse(CLARIFICATION)
+        # if reprompt signal does not match rule in local context, must produce some output
+        if($_response == %response)
+        {
+            # If there's nothing written in CLARIFICATION, use text in NO_UNDERSTAND
+    ^GeneralOutput(REPHRASE) ^MACRO_TipsAndTricks_SLEEP_REPHRASE()
+        }
+    }
+    else if($T_TNTJSON.gbl_fallback_count > 0){
+    ^MACRO_TipsAndTricks_NODE_BREAK_UP_COMMAND() ^MACRO_TipsAndTricks_NODE_REPEAT_COMMAND() <usel variant="1" genre="none">Moxie</usel>,  please.
+        $T_TNTJSON.scaffold = 1
+    }
+    else{
+    # Exit Node
+    ^gambit(~TNT_FTE_Sleep_Failed_to_say_Command) # Gambit Specific Path
+    }
+
+topic:  ~TNT_FTE_Sleep_Failed_to_say_Command   keep repeat   [] 
+# base_topic_move_on.jinja
+t: PROMPT() ^keep() ^repeat()
+    # prompt markup/text
+    We may have to come back to this one.
+    # prompt text 2
+    We can continue later!
+    # Additional ChatScript code may be located below:
+    # set this run of the module as incomplete
+    ^TNT_incompletion()
+    # Exit Node
+    ^gambit(~TNT_FTE_Sleep_unnamed_ExitNode_94EE731A_6283_4C01_A054_D06D0337FE2A_FE2A) # Gambit Specific Path
+### BaseTemplates/base_topic_move_on.jinja ###
+
+topic:  ~TNT_FTE_Sleep_refuses   keep repeat   [] 
+# base_topic_move_on.jinja
+t: PROMPT() ^keep() ^repeat()
+    # prompt markup/text
+    We can continue later!
+    # Additional ChatScript code may be located below:
+    # set this run of the module as incomplete
+    ^TNT_incompletion()
+    # Exit Node
+    ^gambit(~TNT_FTE_Sleep_unnamed_ExitNode_94EE731A_6283_4C01_A054_D06D0337FE2A_FE2A) # Gambit Specific Path
+### BaseTemplates/base_topic_move_on.jinja ###
+# Outputs "Say 'Moxie, Let's go!' when you're ready to move on!"
+# Should be used in places where Moxie gives instructions and has for user
+# instruction to continue.
+# This node moves on when a user says "Moxie, let's go" and things like "Moxie I'm back".
+# This node has a move on for when the user says they cannot or do not want to do the task.
+# This node handles when a child says "Okay" or "Wait" to just return a silent nod.
+
+topic:  ~TNT_FTE_Sleep_timed_out_prompt   keep repeat   [] 
+t: PROMPT() ^keep() ^repeat()
+    # prompt markup/text
+    ^MACRO_TipsAndTricks_HELLO_RESET()  Oh! Let me know when you're ready to practice this tip!
+        ^GeneralOutput(LETS_GO_REGULAR_VARIANT)
+$T_TNTJSON.max_fallbacks_num = $fallbacksJSON.count_repitition - 1
+u: CLARIFICATION(^gbl_clarification())
+    # no clarification output provided
+u: REPROMPT(^gbl_reprompt())
+    # reprompt text
+    ^MACRO_TipsAndTricks_HELLO_RESET()  Oh! Let me know when you're ready to practice this tip!
+        ^GeneralOutput(LETS_GO_REGULAR_VARIANT)
+# When the user says "Moxie, let's go"/"Moxie, I am done"
+u: USER_IS_READY ([ ^P_HANGOUT_nextModule() ^globalPattern_childContinueMission() (^P_FTUE_confirmReady()) ])
+    ^GeneralOutput(ACK_YES_EXCITED)
+    # Exit Node
+    ^gambit(~TNT_FTE_Sleep_Introduce_the_Scenario) # Gambit Specific Path
+# When the user says a short phrase like "okay" or "hold on" to confirm they've understood the task
+u: CONFIRMATION ([^globalPattern_yesBot() ^globalPattern_pauseBot()])
+    # non-verbal confirmation
+    ^moxie_interested()
+    ^restartTimer()
+# When the user says they are unsure about what Moxie is asking of them
+u: IDK ([ ^globalPattern_idkBot()  ])
+    Then, let's practice the tip together!
+    # Exit Node
+    ^gambit(~TNT_FTE_Sleep_Introduce_the_Scenario) # Gambit Specific Path
+# When user says they cannot or do not wish to do what Moxie is asking of them
+u: USER_CANNOT ([ ^globalPattern_willNegative() ^globalPattern_childNotWant() ^globalPattern_childCanNot() ^globalPattern_childNoMore() (^globalPattern_childNotReady())])
+    Oh, okay!
+    # Exit Node
+    ^gambit(~TNT_FTE_Sleep_refuses) # Gambit Specific Path
+# when the user says anything else, plays the moxie interested animation
+u: CUSTOM_FALLBACK(^gbl_fallback())
+    ^moxie_interested()
+    ^restartTimer()

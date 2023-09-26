@@ -1,0 +1,131 @@
+# *************************************************************************************
+# README:
+# The base_topic's node focus is to allow Moxie to say a prompt and be able to
+#    reprompt.
+# NOTE:
+#    This file  was created by a teammate!
+# *************************************************************************************
+
+{% import "Macros/node_utility.jinja" as util %}
+topic: {% block topic_name %} ~{{topic_name}} {% endblock %} {% block topic_cs_flags %} keep repeat {% endblock %} {% block topic_rb_flags %} [{{topic_flags}}] {% endblock %}
+{% block prompt_rule %}
+t: PROMPT() ^keep() ^repeat()
+    {% block prompt_content %}
+    {% if markup_variations %}
+    # prompt markup variations
+    [ {{prompt_text}} ]
+    {% for m in markup_variations %}
+    [ {{m}} ]
+    {% endfor %}
+
+    {% elif text_variations %}
+    # prompt text variations
+    [ {{prompt_text}} ]
+    {% for t in text_variations %}
+    [ {{t}} ]
+    {% endfor %}
+
+    {% else %}
+    # prompt markup/text
+    {{prompt_text}}
+    {% endif %}
+
+    {% for monologue in node_monologues %}
+    {% if monologue.markup_variations %}
+    # prompt markup variations {{loop.index+1}}
+    " " # This is here just in case there are more variations directly above this
+    {% if monologue.markup %}
+    [ {{monologue.markup}} ]
+    {% else %}
+    [ {{monologue.output}} ]
+    {% endif %}
+    {% for m in monologue.markup_variations %}
+    [ {{m}} ]
+    {% endfor %}
+
+    {% elif monologue.text_variations %}
+    # prompt text variations {{loop.index+1}}
+    " " # This is here just in case there are more variations directly above this
+    {% if monologue.markup %}
+    [ {{monologue.markup}} ]
+    {% else %}
+    [ {{monologue.output}} ]
+    {% endif %}
+    {% for t in monologue.text_variations %}
+    [ {{t}} ]
+    {% endfor %}
+
+    {% elif monologue.markup %}
+    # prompt markup {{loop.index+1}}
+    {{monologue.markup}}
+    {% else %}
+    # prompt text {{loop.index+1}}
+    {{monologue.output}}
+    {% endif %}
+
+    {% endfor %}
+
+    {% endblock prompt_content %}
+    
+    {# set tags for the Topic as complete #}
+    {% block tagging %}
+
+    {# set and SEL Tags associated with this Topic as Complete #}
+    {% block sel_tagging %}
+    {# set all sel tags added to the node as complete #}
+    {{ util.complete_sel_tags(sel_tags) }}
+    {% endblock sel_tagging %}
+
+    {# set all content tags added to the node as complete #}
+    {% block content_tagging %}
+    {{ util.complete_content_tags(content_tags) }}
+    {% endblock content_tagging %}
+
+    {% endblock tagging %}
+
+
+    {% block prompt_code %}
+    {% if code %}
+    # code
+    {{code}}
+    {% endif %}
+
+    {% for monologue in node_monologues %}
+    {% if monologue.code %}
+    # code {{loop.index+1}}
+    {{monologue.code}}
+    {% endif %}
+    {% endfor %}
+    {% endblock %}
+
+{% endblock %}
+
+{# generates the clarification rule, if there is one #}
+{% block clarification_rule %}
+u: CLARIFICATION(^gbl_clarification())
+    {# what happens when a clarification is fired #}
+    {% block clarification_content %}
+
+    {% if clarification_markup or clarification_text %}
+    # written clarification output
+    {{ util.markup_text(clarification_markup, clarification_text) }}
+
+    {% else %}
+    {% block clarification_default_response %}
+    # no clarification output provided
+    {% endblock clarification_default_response %}
+    {% endif %}
+
+    {% endblock clarification_content %}
+
+{% endblock clarification_rule %}
+
+{% block reprompt_rule %}
+u: REPROMPT(^gbl_reprompt())
+    {% block reprompt_content %}
+    {# generate reprompt text #}
+    {{util.reprompt(reprompt_text)}}
+    {% endblock %}
+{% endblock %}
+{% block body %}{# rules and main content of a child topic goes here #}
+{% endblock %}
