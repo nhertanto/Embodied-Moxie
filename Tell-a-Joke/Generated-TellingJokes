@@ -3,6 +3,10 @@
 # Here's the part of the generated code showcasing the Repeat Mentor Speech Node
 #   in the Jokes Activity. Here, the child wants to tell Moxie a Knock knock
 #   joke and the node will allow Moxie to repeat the child.
+# NOTE:
+# As a designer, I created the 'patterns,' specific phrases that Moxie would
+#    listen to enter into the Joke activity! See this in Entering-the-Jokes-Activity.top
+# ( https://github.com/nhertanto/Embodied-Moxie/blob/main/Tell-a-Joke/Entering-the-Jokes-Activity.top )
 # *************************************************************************************
 
 topic:  ~JOKE_Entry_Mentor_tell_Joke_knock   keep repeat   [] 
