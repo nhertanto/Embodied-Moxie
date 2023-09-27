@@ -3,6 +3,10 @@
 # This python files creates the property data that gets passed to ShowDrawing.jinja
 #    This allows the developer to create and manipulate the UI and the node
 #    the user sees on the in-house tool.
+# NOTE:
+# To see the Show Drawing node utilized in the Making Friends mission, look at the
+#    at the generated code in Generated-MakingFriendsMission-drawing.top
+# ( https://github.com/nhertanto/Embodied-Moxie/blob/main/Daily-Missions/Generated-MakingFriendsMission-drawing.top )
 # *************************************************************************************
 
 import logging
