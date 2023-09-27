@@ -1,10 +1,14 @@
 # *****************************************************************************
 # README:
-# Here's the part of the generated code showcasing the Book Recognizer Node
+# Here's the part of the generated code showcasing the Book Recognizer Node!
 #   Rules such as 'u: CLICK_CLACK_MOO_COWS_THAT_TYPE' are automatically added
 #   from a csv sheet the user inputs in the node.
 #   These rules refer to the books that Moxie recognizes -- the book's title
 #   and its cover.
+# NOTE:
+# The Reading node was also created to help stand this activity up! Please
+#   look at Reading.jinja to see how Moxie was able to allow a child to read.
+# ( https://github.com/nhertanto/Embodied-Moxie/blob/main/Reading-Activity/Reading.jinja )
 # *****************************************************************************
 
 
