@@ -3,6 +3,10 @@
 # This python files creates the property data that gets passed to ShowFace.jinja
 #    This allows the developer to create and manipulate the UI and the node
 #    the user sees on the in-house tool.
+# NOTE:
+# To see the Show Face node utilized in the Feeling Mad mission, look at the
+#    at the generated code in Generated-FeelingMadMission-showFace.top
+# ( https://github.com/nhertanto/Embodied-Moxie/blob/main/Daily-Missions/Generated-FeelingMadMission-showFace.top )
 # *************************************************************************************
 
 import logging
