@@ -2,6 +2,10 @@
 # README:
 # Here's the part of the generated code showcasing the Show Drawing Node
 #   in a Making Friends daily mission.
+# NOTE:
+# The Show Face node was also created to help expand Moxie's capabilites! Please
+#   look at ShowFace.jinja to see how a child can now show Moxie their face.
+# ( https://github.com/nhertanto/Embodied-Moxie/blob/main/Daily-Missions/ShowFace.jinja ) 
 # *****************************************************************************
 
 # show drawing node start ##
