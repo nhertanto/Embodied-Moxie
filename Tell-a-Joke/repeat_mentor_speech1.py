@@ -3,6 +3,10 @@
 # This python files creates the property data that gets passed to RepeatMentorSpeech.jinja
 #    This allows the developer to create and manipulate the UI and the node
 #    the user sees on the in-house tool.
+# NOTE:
+# To see the Repeat Mentor Speech node utilized in the Jokes Activity, look at the
+#    at the generated code in Generated-TellingJokes.top
+# ( https://github.com/nhertanto/Embodied-Moxie/blob/main/Tell-a-Joke/Generated-TellingJokes )
 # *************************************************************************************
 
 from ...flexible.flexible_node_data import FlexibleNodeData
