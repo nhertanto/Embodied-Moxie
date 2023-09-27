@@ -3,6 +3,10 @@
 # This python files creates the property data that gets passed to bookRecognizer.jinja
 #    This allows the developer to create and manipulate the UI adn the node
 #    the user sees on the in-house tool.
+# NOTE:
+# To see the Book Recognizer node utilized in the Reading Activity, look at the
+#    at the generated code in Generated-Reading-BookRecognizer.top
+# ( https://github.com/nhertanto/Embodied-Moxie/blob/main/Reading-Activity/Generated-Reading-BookRecognizerNode.top )
 # *************************************************************************************
 
 from ...flexible.flexible_node_data import FlexibleNodeData
