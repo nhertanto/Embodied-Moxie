@@ -3,6 +3,10 @@
 # This python files creates the property data that gets passed to Reading.jinja
 #    This allows the developer to create and manipulate the UI and the node
 #    the user sees on the in-house tool.
+# NOTE:
+# To see the Reading node utilized in the Reading Activity, look at the
+#    at the generated code in Generated-Reading-ReadingNode.top
+# ( https://github.com/nhertanto/Embodied-Moxie/blob/main/Reading-Activity/Generated-Reading-ReadingNode.top )
 # *************************************************************************************
 
 import csv
