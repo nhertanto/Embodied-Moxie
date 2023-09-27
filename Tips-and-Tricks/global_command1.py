@@ -3,6 +3,10 @@
 # This python files creates the property data that gets passed to GlobalCommand.jinja
 #    This allows the developer to create and manipulate the UI and the node
 #    the user sees on the in-house tool.
+# NOTE:
+# To see the Global Command node utilized in the Tips and Tricks Activity, look at the
+#    at the generated code in Generated-TipsAndTricks.top
+# ( https://github.com/nhertanto/Embodied-Moxie/blob/main/Tips-and-Tricks/Generated-TipsAndTricks.top )
 # *************************************************************************************
 
 from ...flexible.flexible_node_data import FlexibleNodeData
